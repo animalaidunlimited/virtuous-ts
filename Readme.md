@@ -33,6 +33,14 @@ pnpm add virtuous-ts
 
 ### Load the VirtuousClient
 
+### Setup Environment Variables
+
+Copy the example .env file and add your API key:
+
+```bash
+cp .env-example .env
+```
+
 #### Load the VirtuousClient
 
 ```typescript
