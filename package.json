@@ -1,0 +1,63 @@
+{
+  "name": "virtuous-ts",
+  "version": "0.1.0",
+  "description": "A lightweight, type-safe TypeScript client for the Virtuous CRM API. Includes support for gifts, recurring gifts, planned gifts, contacts, addresses, query builders, and safe update helpers.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/animalaidunlimited/virtuous-ts.git"
+  },
+  "homepage": "https://github.com/animalaidunlimited/virtuous-ts#readme",
+  "bugs": {
+    "url": "https://github.com/animalaidunlimited/virtuous-ts/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo '⚠️  WARNING: Tests hit LIVE Virtuous CRM data (creates/modifies contacts, gifts, etc). Requires valid VIRTUOUS_API_KEY in .env. Not suitable for automated CI without mocks. Use npm run test:all to run.\\n\\nSee tests/README or individual test files for details.'",
+    "test:all": "vitest run 01 02 03 04 05",
+    "test:watch": "vitest watch",
+    "test:ui": "vitest 01 02 03 04 05 --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "virtuous",
+    "crm",
+    "api",
+    "typescript",
+    "nonprofit",
+    "donations",
+    "fundraising",
+    "sdk",
+    "api-client"
+  ],
+  "author": "Spencer Hardy",
+  "contributors": [
+    "Animal Aid Unlimited <info@animalaidunlimited.com>[](https://www.animalaidunlimited.com/)"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "sideEffects": false,
+  "dependencies": {
+    "axios": "^1.13.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@vitest/coverage-v8": "^4.0.14",
+    "@vitest/ui": "^4.0.14",
+    "dotenv": "^17.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.13"
+  }
+}
