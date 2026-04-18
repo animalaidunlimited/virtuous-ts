@@ -235,4 +235,4 @@ This project is licensed under the [MIT License](LICENSE) - see the LICENSE file
 
 ---
 
-**First public release (v0.1.0)** - Feedback appreciated! Star the repo if useful.
+**First public release (v0.1.2)** - Feedback appreciated! Star the repo if useful.
