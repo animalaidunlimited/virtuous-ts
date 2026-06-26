@@ -12,6 +12,10 @@ dotenv.config();
  * across Vitest's module isolation boundaries.
  */
 export default async function globalSetup() {
+  if (process.env.VITEST_UNIT_ONLY === '1') {
+    return;
+  }
+
   const client = createTestClient();
   const testContactEmail = generateTestEmail();
   const testContactName = DEFAULT_CONTACT_NAME;

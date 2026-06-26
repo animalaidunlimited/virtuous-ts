@@ -2,6 +2,8 @@ import { GiftType } from "./gift-constants";
 import { RecurringGiftPayment } from "../recurring-gift/recurring-gift-payment";
 import { CurrencyCode } from "../shared/currency-code";
 import { CustomField } from "../shared/custom-field";
+import { State } from "../shared/gift-state";
+import type { TributeType } from "./gift-create";
 
 export interface GiftDesignation {
   id: number;
@@ -71,13 +73,16 @@ export interface Gift {
   grantUrl: string | null;
 
   notes: string | null;
+  /** Read model uses `tribute`; maps to `tributeDescription` on update. */
   tribute: string | null;
   tributeId: number | null;
-  tributeType: string | null;
+  tributeType: TributeType | string | null;
+  /** Read model name; maps to `acknowledgeeId` on update. */
   acknowledgeeIndividualId: number | null;
 
   receiptDate: string | null;
   receiptDateFormatted: string | null;
+  receiptSegmentId?: number | null;
 
   contactPassthroughId: number | null;
   contactPassthroughUrl: string | null;
@@ -85,7 +90,45 @@ export interface Gift {
 
   cashAccountingCode: string | null;
   giftAskId: number | null;
+  passthroughGiftAskId?: number | null;
   contactMembershipId: number | null;
+
+  state?: State | null;
+
+  // Payment method details (may be absent on summary responses; present on GET /Gift/{id})
+  checkNumber?: string | null;
+  creditCardType?: string | null;
+
+  // Cryptocoin
+  cryptocoinType?: string | null;
+  transactionHash?: string | null;
+  coinSoldForCash?: boolean;
+  coinAmount?: number | null;
+  dateCoinWasSold?: string | null;
+  coinSaleAmount?: number | null;
+
+  // Stock
+  tickerSymbol?: string | null;
+  numberOfShares?: number | null;
+  stockSoldForCash?: boolean;
+  dateStockWasSold?: string | null;
+  stockSaleAmount?: number | null;
+
+  // IRA / non-cash
+  iraCustodian?: string | null;
+  nonCashGiftTypeId?: number | null;
+  nonCashGiftType?: string | null;
+  /** Non-cash gift description (update field name: `description`). */
+  description?: string | null;
+  nonCashSoldForCash?: boolean;
+  dateNonCashWasSold?: string | null;
+  nonCashOriginalAmount?: number | null;
+  nonCashSaleAmount?: number | null;
+
+  /** Present when GET returns the update-shaped field name instead of `tribute`. */
+  tributeDescription?: string | null;
+  /** Present when GET returns the update-shaped field name instead of `acknowledgeeIndividualId`. */
+  acknowledgeeId?: number | null;
 
   giftDesignations: GiftDesignation[];
   giftPremiums: GiftPremium[];

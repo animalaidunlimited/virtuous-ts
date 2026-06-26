@@ -37,6 +37,7 @@ export interface RecurringGiftDesignation {
     isPrivate: boolean;
     status: string;                       // e.g. "Active", "Cancelled"
     nextExpectedPaymentDate: string | null;
+    thankYouDate?: string | null;
     designations: RecurringGiftDesignation[];
     customFields: RecurringGiftCustomField[];
   }

@@ -1,6 +1,6 @@
 {
   "name": "virtuous-ts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A lightweight, type-safe TypeScript client for the Virtuous CRM API. Includes support for gifts, recurring gifts, planned gifts, contacts, addresses, query builders, and safe update helpers.",
   "repository": {
     "type": "git",

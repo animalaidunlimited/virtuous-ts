@@ -8,6 +8,7 @@ import { RecurringGiftCustomFieldListResponse } from '../types/recurring-gift/re
 import { QueryOptionsResponse } from '../types/shared/query-options';
 import { QueryRequest } from '../types/shared/query';
 import { RecurringGiftPaymentListResponse } from '../types/recurring-gift/recurring-gift-payment';
+import { convertRecurringGiftToUpdateRequest } from '../utils/convert-recurring-gift-to-update-request';
 
 
 /**
@@ -33,41 +34,6 @@ import { RecurringGiftPaymentListResponse } from '../types/recurring-gift/recurr
  * const recurringGift = await virtuous.recurringGift.getRecurringGiftById(12345);
  */
 const createRecurringGiftClient = (client: AxiosInstance) => {
-    const convertRecurringGiftToUpdateRequest = (gift: RecurringGift): UpdateRecurringGiftRequest => {
-        const {
-          // These are read-only — strip them
-          id: _id,
-          transactionSource: _source,
-          transactionId: _tid,
-          contactId: _contactId,
-          createDateTimeUtc: _created,
-          createdByUser: _creator,
-          modifiedDateTimeUtc: _modified,
-          modifiedByUser: _modifier,
-          segment: _segmentName,
-          segmentUrl: _segmentUrl,
-          cancelDateTimeUtc: _cancelDateTimeUtc,
-          status: _status,
-          // Keep everything else
-          ...editable
-        } = gift;
-      
-        return {
-          ...editable,
-          // Remap designations (only what API accepts)
-          designations: gift.designations.map(d => ({
-            projectId: d.projectId,
-            amountDesignated: d.amountDesignated,
-          })),
-          // Custom fields — displayName optional
-          customFields: gift.customFields.map(c => ({
-            name: c.name,
-            value: c.value,
-            displayName: c.displayName,
-          })),
-        };
-      };
-
   return {
 
 

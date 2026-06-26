@@ -16,6 +16,7 @@ import type { QueryRequest } from '../types/shared/query';
 import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { GiftListSkipTakeParams, SkipTakeParams } from '../types/shared/skip-take-params';
 import { CreateGiftRequest } from '../types/gift/gift-create';
+import { convertGiftToUpdateGiftRequest } from '../utils/convert-gift-to-update-request';
 
 
 
@@ -38,82 +39,6 @@ import { CreateGiftRequest } from '../types/gift/gift-create';
  * await virtuous.gift.updateGiftSafely(12345, { amount: 500 });
  */
 const createGiftClient = (client: AxiosInstance) => {
-  const convertGiftToUpdateGiftRequest = (gift: Gift): UpdateGiftRequest => {
-    const {
-      // ── Read-only fields we must NOT send back ─────────────────────────────
-      id: _id,
-      transactionSource: _source,
-      transactionId: _tid,
-      contactId: _contactId,
-      contactName: _contactName,
-      contactUrl: _contactUrl,
-      giftTypeFormatted: _typeFmt,
-      giftDateFormatted: _dateFmt,
-      amountFormatted: _amtFmt,
-      baseCurrencyCode: _baseCurr,
-      createDateTimeUtc: _created,
-      createdByUser: _creator,
-      modifiedDateTimeUtc: _modified,
-      modifiedByUser: _modifier,
-      segment: _segmentName,
-      segmentCode: _segmentCode,
-      segmentUrl: _segmentUrl,
-      mediaOutlet: _mediaOutlet,
-      grant: _grant,
-      grantUrl: _grantUrl,
-      tribute: _tribute,
-      acknowledgeeIndividualId: _acknowledgeeIndividualId,
-      receiptDateFormatted: _receiptFmt,
-      contactPassthroughUrl: _passthroughUrl,
-      giftUrl: _giftUrl,
-
-      // ── Collections — safely default to empty array if undefined ───────────
-      giftDesignations = [],
-      giftPremiums = [],
-      pledgePayments = [],
-      recurringGiftPayments = [],
-      customFields = [],
-
-      // ── Everything else is editable and safe to send ───────────────────────
-      ...editable
-    } = gift;
-
-    return {
-      ...editable,
-
-      // Remap collections to the exact shape Virtuous expects on update
-      giftDesignations: giftDesignations.map((d) => ({
-        projectId: d.projectId,
-        amount: d.amountDesignated,
-        state: 'Updated',
-      })),
-
-      giftPremiums: giftPremiums.map((p) => ({
-        premiumId: p.premiumId,
-        quantity: p.quantity,
-        state: 'Updated',
-      })),
-
-      pledgePayments: pledgePayments.map((p) => ({
-        id: p.id,
-        amount: p.actualAmount ?? p.expectedAmount ?? 0,
-        state: 'Updated',
-      })),
-
-      recurringGiftPayments: recurringGiftPayments.map((r) => ({
-        id: r.id,
-        amount: r.gift.amount,
-        state: 'Updated',
-      })),
-
-      customFields: customFields.map((c) => ({
-        name: c.name,
-        value: c.value,
-        displayName: c.displayName,
-      })),
-    };
-  };
-
   return {
     // ── Basic Gift Operations ─────────────────────────────────────────────
     /**

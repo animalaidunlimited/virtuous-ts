@@ -36,6 +36,8 @@ export type {
 
 export type { SimpleGiftFilters } from './utils/build-gift-query';
 export { buildGiftQuery } from './utils/build-gift-query';
+export { convertGiftToUpdateGiftRequest } from './utils/convert-gift-to-update-request';
+export { convertRecurringGiftToUpdateRequest } from './utils/convert-recurring-gift-to-update-request';
 
 // ── Gift: Creation Helpers ──────────────────
 export type { SimpleDonationForm } from './utils/create-gift-from-form';
