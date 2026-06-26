@@ -1,5 +1,5 @@
 import { GiftType } from "./gift-constants";
-import { GiftFrequency } from "../shared/gift-frequency";
+import { GiftFrequency, RecurringGiftFrequency } from "../shared/gift-frequency";
 import { CurrencyCode } from "../shared/currency-code";
 
 export interface GiftContactInput {
@@ -75,6 +75,47 @@ export interface GiftContactInput {
     rsvpResponse?: boolean;
     attended?: boolean;
   }
+
+  /**
+   * A single passthrough (soft credit) entry for the `giftPassthroughs` collection.
+   * Note: the Virtuous API expects camelCase name fields here (firstName/lastName),
+   * which differs from the lowercase fields on the top-level `contact`/`passthroughContact`.
+   */
+  export interface GiftPassthroughContactInput {
+    referenceId?: string | null;
+    id?: number | null;
+    name?: string | null;
+    type?: string | null;
+    title?: string | null;
+    firstName?: string | null;
+    middleName?: string | null;
+    lastName?: string | null;
+    suffix?: string | null;
+    birthMonth?: string | null;
+    birthDay?: string | null;
+    birthYear?: string | null;
+    gender?: string | null;
+    emailType?: string | null;
+    email?: string | null;
+    phoneType?: string | null;
+    phone?: string | null;
+    address?: {
+      address1?: string | null;
+      address2?: string | null;
+      city?: string | null;
+      state?: string | null;
+      postal?: string | null;
+      country?: string | null;
+    } | null;
+    tags?: string | null;
+    emailLists?: string[] | null;
+  }
+
+  export interface GiftPassthrough {
+    contactId?: number | null;
+    passthroughContact?: GiftPassthroughContactInput | null;
+    amount?: string | number | null;
+  }
   
   export interface CreateGiftTransactionRequest {
     // Required core
@@ -84,6 +125,7 @@ export interface GiftContactInput {
     contact: GiftContactInput;
   
     giftDate: string;                             // ISO date or "YYYY-MM-DD"
+    cancelDate?: string | null;                   // for reversing/cancelling a recurring or pledge schedule
     giftType: GiftType;
     amount: string | number;
   
@@ -91,12 +133,31 @@ export interface GiftContactInput {
     currencyCode?: CurrencyCode | null;
     exchangeRate?: number | null;
     frequency: GiftFrequency;                    // for recurring
+
+    // ── Recurring gift linking ──────────────────
+    /**
+     * Links this gift to an existing recurring gift commitment by the recurring
+     * gift's TransactionId. Use this on subsequent payments (omit `frequency` on
+     * those) so Virtuous attaches the payment to the right recurring gift instead
+     * of creating a new commitment.
+     */
+    recurringGiftTransactionId?: string | null;
+    /** Set true to update the matched recurring gift commitment from this transaction. */
+    recurringGiftTransactionUpdate?: boolean | null;
+
+    // ── Pledge linking ──────────────────────────
+    pledgeFrequency?: RecurringGiftFrequency | null;
+    pledgeTransactionId?: string | null;
+    /** Note: the API field name is misspelled ("Fullfillment"); kept verbatim to match the wire format. */
+    pledgeExpectedFullfillmentDate?: string | null;
+
     batch?: string | null;
     notes?: string | null;
     segment?: string | null;
     mediaOutlet?: string | null;
     receiptDate?: string | null;
     receiptSegment?: string | null;
+    cashAccountingCode?: string | null;
     isPrivate?: boolean;
     isTaxDeductible?: boolean;
   
@@ -130,6 +191,11 @@ export interface GiftContactInput {
     // Passthrough / event
     contactIndividualId?: number | null;
     passthroughContact?: GiftContactInput | null;
+    /**
+     * Multiple passthrough (soft credit) entries. Takes precedence over
+     * `passthroughContact` when both are supplied. Max 100 entries, no duplicate contacts.
+     */
+    giftPassthroughs?: GiftPassthrough[] | null;
     eventAttendee?: EventAttendee | null;
   
     // URLs

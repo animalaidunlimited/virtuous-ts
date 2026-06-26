@@ -15,7 +15,11 @@ export type {
 } from './types/gift/gift';
 
 export type { UpdateGiftRequest } from './types/gift/gift-update';
-export type { CreateGiftTransactionRequest } from './types/gift/gift-transaction-create';
+export type {
+  CreateGiftTransactionRequest,
+  GiftPassthrough,
+  GiftPassthroughContactInput,
+} from './types/gift/gift-transaction-create';
 export type { CreateGiftRequest } from './types/gift/gift-create';
 
 // ── Gift: Query & Search ────────────────────
