@@ -139,6 +139,23 @@ export type { SimplePlannedGiftFilters } from './utils/build-planned-gift-query'
 export { buildPlannedGiftQuery } from './utils/build-planned-gift-query';
 
 
+// ── Project ───────────────────────────────────
+export type { Project, ProjectGiftSpecification } from './types/project/project';
+export type {
+  CreateProjectRequest,
+  CreateProjectOptions,
+} from './types/project/project-create';
+export { buildAutoCreateProjectRequest } from './utils/build-auto-create-project-request';
+
+// ── Contact Note ──────────────────────────────
+export type { ContactNote, ContactNoteReminder } from './types/contact-note/contact-note';
+export type { CreateContactNoteInput, CreateContactNoteWireBody } from './types/contact-note/create-contact-note';
+export {
+  toCreateContactNoteWireBody,
+  buildGeneralContactNoteInput,
+} from './types/contact-note/create-contact-note';
+
+
 // ── Receipts ────────────────────────────────
 export type { ReceiptListResponse } from './types/contact/contact-receipts';
 

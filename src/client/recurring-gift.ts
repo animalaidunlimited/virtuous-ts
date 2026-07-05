@@ -39,24 +39,20 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get recurring gifts for a contact
-     * 
-     * @param contactId - The ID of the contact
-     * @param params - Optional skip/take for sorting and pagination
-     * @returns Paginated list of recurring gift objects
-     * @example
-     * await virtuous.recurringGift.getRecurringGiftsForContact(12345);
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/gets-the-recurring-gifts-for-the-specified-contact
+     * @param {number} contactId - Contact id.
+     * @param {GiftListSkipTakeParams} [params] - Pagination.
+     * @returns {Promise<RecurringGiftListResponse>} Resolved API payload.
      */
     getRecurringGiftsForContact: (contactId: number, params?: GiftListSkipTakeParams) =>
       client.get<RecurringGiftListResponse>(`/RecurringGift/ByContact/${contactId}`, { params }).then((r) => r.data),
 
 
     /**
-     * Get a recurring gift by ID
-     * 
-     * @param id - The ID of the recurring gift
-     * @returns The recurring gift object
-     * @example
-     * await virtuous.recurringGift.getRecurringGiftById(12345);
+     * Get recurring gift by id
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/gets-the-specified-recurring-gift
+     * @param {number} id - Recurring gift id.
+     * @returns {Promise<RecurringGift>} Resolved API payload.
      */
     getRecurringGiftById: (id: number) =>
       client.get<RecurringGift>(`/RecurringGift/${id}`).then((r) => r.data),
@@ -64,29 +60,9 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
 
     /**
      * Create a recurring gift
-     * 
-     * @param request - The create recurring gift request object
-     * @returns The created recurring gift object
-     * @example
-     * await virtuous.recurringGift.createRecurringGift({
-     *   contactId: 12345,
-     *   startDate: "2025-04-01",
-     *   frequency: "Monthly",
-     *   amount: 100.00,
-     *   nextExpectedPaymentDate: "2025-05-01",
-     *   anticipatedEndDate: null,
-     *   thankYouDate: "2025-04-02",
-     *   automatedPayments: true,
-     *   trackPayments: true,
-     *   isPrivate: false,
-     *   designations: [
-     *     { projectId: 901, amountDesignated: 75.00 },
-     *     { projectId: 902, amountDesignated: 25.00 }
-     *   ],
-     *   customFields: [
-     *     { name: "Source", value: "FreeWill", displayName: "Donation Source" }
-     *   ]
-     * });
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/created-a-new-recurring-gift
+     * @param {CreateRecurringGiftRequest} request - Create body.
+     * @returns {Promise<RecurringGift>} Resolved API payload.
      */
     createRecurringGift: (request: CreateRecurringGiftRequest) =>
       client.post<RecurringGift>(`/RecurringGift`, request).then((r) => r.data),
@@ -94,46 +70,20 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
 
     /**
      * Update a recurring gift
-     * 
-     * @param id - The ID of the recurring gift to update
-     * @param request - The update recurring gift request object
-     * @returns The updated recurring gift object
-     * @example
-     * await virtuous.recurringGift.updateRecurringGift(12345, {
-     *  startDate: "2025-04-01",
-     *  frequency: "Monthly",
-     *  amount: 100.00,
-     *  nextExpectedPaymentDate: "2025-05-01",
-     *  anticipatedEndDate: null,
-     *  thankYouDate: "2025-04-02",
-     *  automatedPayments: true,
-     *  trackPayments: true,
-     *  isPrivate: false,    
-     *  designations: [
-     *    { projectId: 901, amountDesignated: 75.00 },
-     *    { projectId: 902, amountDesignated: 25.00 }
-     *  ],
-     *  customFields: [
-     *    { name: "Source", value: "FreeWill", displayName: "Donation Source" }
-     *  ]
-     * });
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/update-an-existing-recurring-gift
+     * @param {number} id - Recurring gift id.
+     * @param {UpdateRecurringGiftRequest} request - Full update body.
+     * @returns {Promise<RecurringGift>} Resolved API payload.
      */
     updateRecurringGift: (id: number, request: UpdateRecurringGiftRequest) =>
       client.put<RecurringGift>(`/RecurringGift/${id}`, request).then((r) => r.data),
 
     /**
-     * Update a recurring gift safely
-     * 
-     * This method is used to update a recurring gift safely. This method will request the current recurring gift object from Virtuous
-     * and populate the request object with the existing values before appending the changes.
-     * 
-     * Only the fields that are being updated should be included in the changes object.
-     *
-     * @param recurringGiftId - The ID of the recurring gift to update
-     * @param changes - The changes to apply to the update recurring gift request object
-     * @returns The updated recurring gift object
-     * @example
-     * await virtuous.recurringGift.updateRecurringGiftSafely(12345, { amount: 500 });
+     * Update a recurring gift (merge changes)
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/update-an-existing-recurring-gift
+     * @param {number} recurringGiftId - Recurring gift id.
+     * @param {Partial<UpdateRecurringGiftRequest>} changes - Fields to merge.
+     * @returns {Promise<RecurringGift>} Resolved API payload.
      */
     updateRecurringGiftSafely: async (
         recurringGiftId: number,
@@ -156,55 +106,45 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
 
     /**
      * Cancel a recurring gift
-     * 
-     * @param recurringGiftId - The ID of the recurring gift to cancel
-     * @param request - The cancel recurring gift request object
-     * @returns The cancelled recurring gift object
-     * @example
-     * await virtuous.recurringGift.cancelRecurringGift(12345, { cancelReason: "Donor requested", categoryId: 1 });
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/cancels-the-specified-recurring-gift
+     * @param {number} recurringGiftId - Recurring gift id.
+     * @param {CancelRecurringGiftRequest} request - Cancel body.
+     * @returns {Promise<RecurringGift>} Resolved API payload.
      */
     cancelRecurringGift: (recurringGiftId: number, request: CancelRecurringGiftRequest) =>
       client.put<RecurringGift>(`/RecurringGift/Cancel/${recurringGiftId}`, request).then((r) => r.data),
 
     /**
      * Get recurring gift custom fields
-     * 
-     * @returns Recurring gift custom fields
-     * @example
-     * const customFields = await virtuous.recurringGift.getRecurringGiftCustomFields();
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/get-the-custom-fields-available-for-recurring-gifts
+     * @returns {Promise<RecurringGiftCustomFieldListResponse>} Resolved API payload.
      */
     getRecurringGiftCustomFields: () => client.get<RecurringGiftCustomFieldListResponse>(`/RecurringGift/CustomFields`).then((r) => r.data),
 
 
     /**
-     * Search recurring gifts and return a list of recurring gifts with abbreviated details
-     * 
-     * @param request - The request query object
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of recurring gift objects
-     * @example
-     * const results = await virtuous.recurringGift.queryRecurringGiftsWithAbbreviatedDetails(request);
+     * Query recurring gifts
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/request-recurring-gifts-with-a-custom-query
+     * @param {QueryRequest} request - Query body.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<RecurringGiftListResponse>} Resolved API payload.
      */
     queryRecurringGifts: (request: QueryRequest, params?: SkipTakeParams) =>
       client.post<RecurringGiftListResponse>('/RecurringGift/Query', request, { params }).then((r) => r.data),
 
     /**
      * Get recurring gift query options
-     * 
-     * @returns Recurring gift query options
-     * @example
-     * const options = await virtuous.recurringGift.getRecurringGiftQueryOptions();
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/request-query-options-to-build-a-query-for-recurring-gifts
+     * @returns {Promise<QueryOptionsResponse>} Resolved API payload.
      */
     getRecurringGiftQueryOptions: () => client.get<QueryOptionsResponse>(`/RecurringGift/QueryOptions`).then((r) => r.data),
 
     /**
      * Get payments for a recurring gift
-     * 
-     * @param recurringGiftId - The ID of the recurring gift
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of recurring gift payment objects
-     * @example
-     * const payments = await virtuous.recurringGift.getPaymentForRecurringGift(12345);
+     * @see https://docs.virtuous.org/api-reference/recurring-gift/gets-recurring-gift-payments-for-the-specified-recurring-gift-identifier
+     * @param {number} recurringGiftId - Recurring gift id.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<RecurringGiftPaymentListResponse>} Resolved API payload.
      */
     getPaymentForRecurringGift: (recurringGiftId: number, params?: SkipTakeParams) =>
       client.get<RecurringGiftPaymentListResponse>(`/RecurringGift/Payment/${recurringGiftId}`, { params }).then((r) => r.data),

@@ -43,9 +43,10 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Basic Gift Operations ─────────────────────────────────────────────
     /**
      * Get a gift by ID
+     * @see https://docs.virtuous.org/api-reference/gift/get-a-gift-by-the-identifier
      *
-     * @param id - The ID of the gift
-     * @returns The gift object
+     * @param {number} id - Virtuous gift id.
+     * @returns {Promise<Gift>} The gift record.
      * @example
      * await virtuous.gift.getGift(12345);
      */
@@ -53,10 +54,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get gifts for a contact
+     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-with-the-specified-contact-identifier
      *
-     * @param contactId - The ID of the contact
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of gift objects
+     * @param {number} contactId - Virtuous contact id.
+     * @param {GiftListSkipTakeParams} [params] - Skip/take pagination.
+     * @returns {Promise<GiftListResponse<GiftSummary>>} Gift summaries for the contact.
      * @example
      * await virtuous.gift.getGiftsByContact(12345);
      * */
@@ -67,10 +69,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get gifts for a contact by reference ID
+     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-by-a-contact-reference-identifier
      *
-     * @param referenceId - The reference ID
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of gift objects
+     * @param {string} referenceId - Contact reference id.
+     * @param {GiftsForContactByReferenceIdSkipTakeParams} [params] - Skip/take pagination.
+     * @returns {Promise<GiftListResponse<GiftSummaryWithDesignations>>} Gifts for that reference.
      * @example
      * await virtuous.gift.getGiftsForContactByReferenceId("12345");
      */
@@ -84,10 +87,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get passthrough gifts for a contact
+     * @see https://docs.virtuous.org/api-reference/gift/get-passthrough-gifts-with-the-specified-contact-identifier
      *
-     * @param contactId - The ID of the contact
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of passthrough gift objects
+     * @param {number} contactId - Virtuous contact id.
+     * @param {GiftListSkipTakeParams} [params] - Skip/take pagination.
+     * @returns {Promise<GiftListResponse<GiftSummary>>} Passthrough gifts for the contact.
      * @example
      * await virtuous.gift.getPassthroughGiftsForContact(12345);
      */
@@ -98,10 +102,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get a gift by transaction source and ID
+     * @see https://docs.virtuous.org/api-reference/gift/get-a-gift-by-the-transaction-source-and-identifier
      *
-     * @param transactionSource - The transaction source
-     * @param transactionId - The transaction ID
-     * @returns The gift object
+     * @param {string} transactionSource - Transaction source name.
+     * @param {string} transactionId - Transaction id within that source.
+     * @returns {Promise<Gift>} The matching gift.
      * @example
      * await virtuous.gift.getGiftByTransactionSourceAndId("Face to Face 012025", "12345");
      */
@@ -111,7 +116,8 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Update & Delete ───────────────────────────────────────────────────
     /**
      * Update a gift
-     * 
+     * @see https://docs.virtuous.org/api-reference/gift/update-a-gift-with-the-specified-identifier
+     *
      * Not recommended to use this method directly. Use updateGiftSafely() instead.
      *
      * Virtuous will not accept a gift update request with only the fields that are being updated.
@@ -119,9 +125,9 @@ const createGiftClient = (client: AxiosInstance) => {
      *
      * Use updateGiftSafely() to safely update a gift with a single field update.
      *
-     * @param id - The ID of the gift to update
-     * @param request - The update gift request object
-     * @returns The updated gift object
+     * @param {number} id - Virtuous gift id.
+     * @param {UpdateGiftRequest} request - Fully populated update body (see updateGiftSafely).
+     * @returns {Promise<Gift>} The updated gift.
      * @example
      * await virtuous.gift.updateGift(12345, { amount: 500 });
      */
@@ -136,9 +142,9 @@ const createGiftClient = (client: AxiosInstance) => {
      * 
      * Only the fields that are being updated should be included in the changes object.
      *
-     * @param giftId - The ID of the gift to update
-     * @param changes - The changes to apply to the update gift request object
-     * @returns The updated gift object
+     * @param {number} giftId - Virtuous gift id.
+     * @param {Partial<UpdateGiftRequest>} changes - Fields to merge onto the current gift.
+     * @returns {Promise<Gift>} The updated gift.
      * @example
      * await virtuous.gift.updateGiftSafely(12345, { amount: 500 });
      */
@@ -161,9 +167,10 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Delete a gift
+     * @see https://docs.virtuous.org/api-reference/gift/delete-a-gift-with-the-specified-identifier
      *
-     * @param id - The ID of the gift to delete
-     * @returns void
+     * @param {number} id - Virtuous gift id.
+     * @returns {Promise<void>} Resolves when the gift is deleted.
      * @example
      * await virtuous.gift.deleteGift(12345);
      */
@@ -172,12 +179,13 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Create Gift (preferred method) ────────────────────────────────────
     /**
      * Create a gift using Virtuous's "preferred" transaction method
+     * @see https://docs.virtuous.org/api-reference/gift/create-a-gift-transaction
      *
      * This is the recommended way to create gifts — it supports smart contact matching,
      * reference IDs, custom fields, and all gift types.
      *
-     * @param request - The create gift transaction request object
-     * @returns The created gift object
+     * @param {CreateGiftTransactionRequest} request - v2 transaction create body.
+     * @returns {Promise<Gift>} The created gift.
      * @example
      * await virtuous.gift.createGiftTransaction({
      *   transactionSource: "Face to Face 012025",
@@ -196,10 +204,11 @@ const createGiftClient = (client: AxiosInstance) => {
     createGiftTransaction: (request: CreateGiftTransactionRequest) => client.post<Gift>('/v2/Gift/Transaction', request).then((r) => r.data),
 
     /**
-     * Create a gift
+     * Create a gift (legacy `POST /Gift` — prefer {@link createGiftTransaction})
+     * @see https://docs.virtuous.org/api-reference/gift/create-gift-not-recommended
      *
-     * @param request - The create gift request object
-     * @returns The created gift object
+     * @param {CreateGiftRequest} request - Legacy create body (prefer createGiftTransaction).
+     * @returns {Promise<Gift>} The created gift.
      * @example
      * await virtuous.gift.createGift({
      *   transactionSource: "API Test",
@@ -217,9 +226,10 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Reference Data ────────────────────────────────────────────────────
     /**
      * Get non-cash gift types
+     * @see https://docs.virtuous.org/api-reference/gift/get-non-cash-gift-types-available
      *
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of non-cash gift types
+     * @param {GiftListSkipTakeParams} params - Skip/take pagination.
+     * @returns {Promise<GiftListResponse<NonCashGiftTypes>>} Non-cash gift type catalog.
      * @example
      * const options = await virtuous.gift.getNonCashGiftTypes();
      */
@@ -231,8 +241,9 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Advanced Query ────────────────────────────────────────────────────
     /**
      * Get gift query options
+     * @see https://docs.virtuous.org/api-reference/gift/get-gift-query-options
      *
-     * @returns Gift query options
+     * @returns {Promise<QueryOptionsResponse>} Query builder metadata.
      * @example
      * const options = await virtuous.gift.getGiftQueryOptions();
      */
@@ -240,10 +251,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Search gifts and return a list of gifts with abbreviated details
+     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-matching-the-query-criteria-provided
      *
-     * @param request - The request query object
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of abbreviated gift objects
+     * @param {QueryRequest} request - Virtuous query payload.
+     * @param {SkipTakeParams} [params] - Skip/take pagination.
+     * @returns {Promise<GiftQueryResponse>} Abbreviated gift query results.
      * 
      * Use buildGiftQuery() simple helper function to build the request query object.
      * 
@@ -257,10 +269,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Search gifts and return a list of gifts with full details
+     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-matching-the-query-criteria-provided-with-all-gift-info
      *
-     * @param request - The request query object
-     * @param params - Optional skip/take for pagination
-     * @returns Paginated list of full gift objects
+     * @param {QueryRequest} request - Virtuous query payload.
+     * @param {SkipTakeParams} [params] - Skip/take pagination.
+     * @returns {Promise<GiftListResponse<Gift>>} Full gift query results.
      * 
      * Use buildGiftQuery() simple helper function to build the request query object.
      * 
@@ -283,8 +296,8 @@ const createGiftClient = (client: AxiosInstance) => {
      * Use this inside updateGiftSafely() or when you need to create an update gift request object manually
      * without accidentally wiping data.
      *
-     * @param gift - Full gift object from getGift() or query
-     * @returns Update gift request object
+     * @param {Gift} gift - Full gift from getGift() or query.
+     * @returns {UpdateGiftRequest} Body safe for PUT /Gift/{id}.
      * @example
      * const current = await virtuous.gift.getGift(12345);
      * const base = virtuous.gift.convertGiftToUpdateGiftRequest(current);

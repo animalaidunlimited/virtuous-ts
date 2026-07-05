@@ -40,58 +40,39 @@ import type {
 const createContactAddressesClient = (client: AxiosInstance) => ({
   // ── List & Get ────────────────────────────────────────────────────────
   /**
-   * Get the addresses for a contact
-   * @param contactId - The ID of the contact
-   * @returns the addresses for a contact
-   * @example
-   * const addresses = await virtuous.contactAddresses.getAddressesForContact(12345);
+   * Get addresses for a contact
+   * @see https://docs.virtuous.org/api-reference/contact-address/gets-the-contact-addresses-for-the-specified-contact
+   * @param {number} contactId - Contact id.
+   * @returns {Promise<ContactAddressFull[]>} Resolved API payload.
    */
   getAddressesForContact: (contactId: number) =>
     client.get<ContactAddressFull[]>(`/ContactAddress/ByContact/${contactId}`).then((r) => r.data),
 
   /**
-   * Get an address by ID
-   * @param addressId - The ID of the address
-   * @returns the address
-   * @example
-   * const address = await virtuous.contactAddresses.getAddressById(12345);
+   * Get address by id
+   * @see https://docs.virtuous.org/api-reference/contact-address/gets-the-specified-contact-address
+   * @param {number} addressId - Address id.
+   * @returns {Promise<ContactAddressFull>} Resolved API payload.
    */
   getAddressById: (addressId: number) =>
     client.get<ContactAddressFull>(`/ContactAddress/${addressId}`).then((r) => r.data),
 
   // ── Create / Update ───────────────────────────────────────────────────
   /**
-   * Create an address
-   * @param request - The request to create an address
-   * @returns the created address
-   * @example
-   * const address = await virtuous.contactAddresses.createAddress({
-   *   contactId: 12345,
-   *   label: "Home",
-   *   address1: "123 Main St",
-   *   address2: "Apt 1",
-   *   city: "Anytown",
-   *   state: "CA",
-   *   postal: "12345",
-   *   country: "USA",
-   * });
+   * Create a contact address
+   * @see https://docs.virtuous.org/api-reference/contact-address/creates-a-new-contact-address
+   * @param {CreateContactAddressRequest} request - Create body.
+   * @returns {Promise<ContactAddressFull>} Resolved API payload.
    */
   createAddress: (request: CreateContactAddressRequest) =>
     client.post<ContactAddressFull>('/ContactAddress', request).then((r) => r.data),
 
   /**
-   * Update an address
-   * @param request - The request to update the address
-   * @returns the updated address
-   * @example
-   * const address = await virtuous.contactAddresses.updateAddress(12345, {
-   *   label: "Home",
-   *   address1: "123 Main St",
-   *   city: "Anytown",
-   *   state: "CA",
-   *   postal: "12345",
-   *   country: "USA",
-   * });
+   * Update a contact address
+   * @see https://docs.virtuous.org/api-reference/contact-address/updates-contact-address
+   * @param {number} addressId - Address id.
+   * @param {UpdateContactAddressRequest} request - Update body.
+   * @returns {Promise<ContactAddressFull>} Resolved API payload.
    */
   updateAddress: (addressId: number, request: UpdateContactAddressRequest) =>
     client.put<ContactAddressFull>(`/ContactAddress/${addressId}`, request).then((r) => r.data),
@@ -99,30 +80,27 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
   // ── Archive / Unarchive / Delete ──────────────────────────────────────
   /**
    * Archive an address
-   * @param addressId - The ID of the address
-   * @returns void
-   * @example
-   * await virtuous.contactAddresses.archiveAddress(12345);
+   * @see https://docs.virtuous.org/api-reference/contact-address/archive-a-contact-address
+   * @param {number} addressId - Address id.
+   * @returns {Promise<void>} Resolved API payload.
    */
   archiveAddress: (addressId: number) =>
     client.put<void>(`/ContactAddress/Archive/${addressId}`).then(() => undefined),
 
   /**
    * Unarchive an address
-   * @param addressId - The ID of the address
-   * @returns void
-   * @example
-   * await virtuous.contactAddresses.unarchiveAddress(12345);
+   * @see https://docs.virtuous.org/api-reference/contact-address/unarchive-a-contact-address
+   * @param {number} addressId - Address id.
+   * @returns {Promise<void>} Resolved API payload.
    */
   unarchiveAddress: (addressId: number) =>
     client.put<void>(`/ContactAddress/Unarchive/${addressId}`).then(() => undefined),
 
   /**
    * Delete an address
-   * @param addressId - The ID of the address
-   * @returns void
-   * @example
-   * await virtuous.contactAddresses.deleteAddress(12345);
+   * @see https://docs.virtuous.org/api-reference/contact-address/deletes-the-specified-contact-address
+   * @param {number} addressId - Address id.
+   * @returns {Promise<void>} Resolved API payload.
    */
   deleteAddress: (addressId: number) =>
     client.delete<void>(`/ContactAddress/${addressId}`).then(() => undefined),

@@ -1,0 +1,13 @@
+{
+  "id": 12345,
+  "name": "shopifydonations",
+  "projectCode": "shopifydonations",
+  "externalAccountingCode": "shopifydonations",
+  "isActive": true,
+  "isAvailableOnline": true,
+  "isPublic": true,
+  "type": "Default",
+  "inventoryStatus": "Unspecified",
+  "location": "US",
+  "description": "Project auto-created by integration"
+}

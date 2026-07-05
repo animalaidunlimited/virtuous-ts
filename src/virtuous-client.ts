@@ -5,6 +5,8 @@ import createContactClient from './client/contact';
 import { VirtuousApiErrorResponse, VirtuousApiError } from './errors/virtuous-api-error';
 import createRecurringGiftClient from './client/recurring-gift';
 import createPlannedGiftClient from './client/planned-gift';
+import createProjectClient from './client/project';
+import createContactNoteClient from './client/contact-note';
 
 export interface VirtuousConfig {
   baseURL: string;
@@ -41,6 +43,8 @@ export class VirtuousClient {
   public contact: ReturnType<typeof createContactClient>;
   public recurringGift: ReturnType<typeof createRecurringGiftClient>;
   public plannedGift: ReturnType<typeof createPlannedGiftClient>;
+  public project: ReturnType<typeof createProjectClient>;
+  public contactNote: ReturnType<typeof createContactNoteClient>;
 
   constructor(virtuousConfig: VirtuousConfig) {
     if (!virtuousConfig.apiKey) {
@@ -79,6 +83,8 @@ export class VirtuousClient {
     this.contact = createContactClient(this.client);
     this.recurringGift = createRecurringGiftClient(this.client);
     this.plannedGift = createPlannedGiftClient(this.client);
+    this.project = createProjectClient(this.client);
+    this.contactNote = createContactNoteClient(this.client);
   }
 
   public setTimeout(ms: number) {

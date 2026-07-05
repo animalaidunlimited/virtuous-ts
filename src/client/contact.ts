@@ -40,8 +40,9 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── Single Contact Lookups ─────────────────────────────────────────────
   /**
    * Get a contact by ID
-   * @param contactId - The ID of the contact
-   * @returns The contact
+   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-id
+   * @param {number} contactId - Virtuous contact id.
+   * @returns {Promise<Contact>} Resolved API payload.
    * @example
    * const contact = await virtuous.contact.getContactById(12345);
    */
@@ -50,21 +51,19 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Get a contact by reference source and ID
-   * @param referenceSource - The reference source
-   * @param referenceId - The reference ID
-   * @returns The contact
-   * @example
-   * const contact = await virtuous.contact.getContactByReferenceSourceAndId("Face to Face Campaign 01", "sarah@example.com");
+   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-reference-source-and-id
+   * @param {string} referenceSource - Reference source.
+   * @param {string} referenceId - Reference id.
+   * @returns {Promise<Contact>} Resolved API payload.
    */
   getContactByReferenceSourceAndId: (referenceSource: string, referenceId: string) =>
     client.get<Contact>(`/Contact/${referenceSource}/${referenceId}`).then((r) => r.data),
 
   /**
    * Get a contact by reference ID
-   * @param referenceId - The reference ID
-   * @returns The contact
-   * @example
-   * const contact = await virtuous.contact.getContactByReferenceId("12345");
+   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-reference-id
+   * @param {string} referenceId - Reference id.
+   * @returns {Promise<ContactLookup>} Resolved API payload.
    */
   getContactByReferenceId: (referenceId: string) =>
     client.get<ContactLookup>(`/Contact/ByReference/${referenceId}`).then((r) => r.data),
@@ -72,52 +71,47 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── List & Search ─────────────────────────────────────────────────────
   /**
    * Get contacts by tag ID
-   * @param tagId - The ID of the tag
-   * @param params - The parameters for the request to paginate and sort the results
-   * @returns List of contacts matching the tag ID
-   * @example
-   * const contacts = await virtuous.contact.getContactsByTagId(12345);
+   * @see https://docs.virtuous.org/api-reference/contact/get-contacts-by-tag-id
+   * @param {number} tagId - Tag id.
+   * @param {ContactListParams} [params] - Pagination/sort.
+   * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
    */
   getContactsByTagId: (tagId: number, params?: ContactListParams) =>
     client.get<ContactListResponse<ContactListItem>>(`/Contact/ByTag/${tagId}`, { params }).then((r) => r.data),
 
   /**
-   * Get the contact types
-   * @returns The contact types used in queries
-   * @example
-   * const contactTypes = await virtuous.contact.getContactTypes();
+   * Get contact types
+   * @see https://docs.virtuous.org/api-reference/contact/get-contact-types
+   * @returns {Promise<ContactType[]>} Resolved API payload.
    */
   getContactTypes: () =>
     client.get<ContactType[]>('/Contact/Types').then((r) => r.data),
 
   /**
-   * Find a contact by email or reference source and ID
-   * @param params - The parameters for the request to find a contact by email or reference source and ID
-   * @returns The contact
-   * @example
-   * const contact = await virtuous.contact.findContactByEmailOrReference({ email: "sarah@example.com" });
+   * Find a contact by email or reference
+   * @see https://docs.virtuous.org/api-reference/contact/find-a-contact-by-email-address-or-reference-source-and-id
+   * @param {EmailOrReferenceParams} params - Lookup query params.
+   * @returns {Promise<Contact>} Resolved API payload.
    */
   findContactByEmailOrReference: (params: EmailOrReferenceParams) =>
     client.get<Contact>('/Contact/Find', { params }).then((r) => r.data),
 
   /**
-   * Search contacts by name, email, phone, or address
-   * @param searchBody - The body of the request to search contacts by name, email, phone, or address
-   * @param params - The parameters for the request to paginate and sort the results
-   * @returns List of contacts matching the search criteria
-   * @example
-   * const contacts = await virtuous.contact.searchContacts({ search: "Sarah" });
+   * Search contacts
+   * @see https://docs.virtuous.org/api-reference/contact/find-all-contacts-that-match-fully-or-partially-the-given-search-parameters
+   * @param {ContactSearchBody} searchBody - Search body.
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
    */
   searchContacts: (searchBody: ContactSearchBody, params?: SkipTakeParams) =>
     client.post<ContactListResponse<ContactListItem>>('/Contact/Search', searchBody, { params }).then((r) => r.data),
 
   /**
-   * Search contacts by coordinates
-   * @param geoParams - The parameters for the request to search contacts by coordinates (lat, lon, distanceInMiles)
-   * @param params - The parameters for the request to paginate and sort the results
-   * @returns List of contacts matching the coordinates
-   * @example
-   * const contacts = await virtuous.contact.searchContactsNearCoordinates({ latitude: 37.774929, longitude: -122.419418 });
+   * Search contacts near coordinates
+   * @see https://docs.virtuous.org/api-reference/contact/find-all-contacts-within-a-given-proximity-of-a-geocoordinate
+   * @param {GeoCoordinateSearchParams} geoParams - Geo search.
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ContactGeoResult[]>} Resolved API payload.
    */
   searchContactsNearCoordinates: (geoParams: GeoCoordinateSearchParams, params?: SkipTakeParams) =>
     client.post<ContactGeoResult[]>('/Contact/Proximity', geoParams, { params }).then((r) => r.data),
@@ -125,105 +119,95 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── Create / Update / Archive ─────────────────────────────────────────
   /**
    * Create a contact
-   * @param request - The create contact request object
-   * @returns The contact
-   * @example
-   * const contact = await virtuous.contact.createContact({ contactType: "Individual", name: "Sarah Johnson" });
+   * @see https://docs.virtuous.org/api-reference/contact/create-a-new-contact
+   * @param {CreateContactRequest} request - Create body.
+   * @returns {Promise<Contact>} Resolved API payload.
    */
   createContact: (request: CreateContactRequest) =>
     client.post<Contact>('/Contact', request).then((r) => r.data),
 
   /**
    * Update a contact
-   * @param contactId - The ID of the contact
-   * @param request - The update contact request object
-   * @returns The contact
-   * @example
-   * const contact = await virtuous.contact.updateContact(12345, { name: "Sarah Johnson" });
+   * @see https://docs.virtuous.org/api-reference/contact/update-an-existing-contact
+   * @param {number} contactId - Contact id.
+   * @param {UpdateContactRequest} request - Update body.
+   * @returns {Promise<Contact>} Resolved API payload.
    */
   updateContact: (contactId: number, request: UpdateContactRequest) =>
     client.put<Contact>(`/Contact/${contactId}`, request).then((r) => r.data),
 
   /**
    * Archive a contact
-   * @param contactId - The ID of the contact
-   * @param params - The archive contact request object
-   * @returns void
-   * @example
-   * await virtuous.contact.archiveContact(12345, { reason: "Inactive" });
+   * @see https://docs.virtuous.org/api-reference/contact/archive-a-contact
+   * @param {number} contactId - Contact id.
+   * @param {ArchiveContactParams} params - Archive options.
+   * @returns {Promise<void>} Resolved API payload.
    */
   archiveContact: (contactId: number, params: ArchiveContactParams) =>
     client.put<void>(`/Contact/Archive/${contactId}`, params).then(() => undefined),
 
   /**
    * Unarchive a contact
-   * @param contactId - The ID of the contact
-   * @returns void
-   * @example
-   * await virtuous.contact.unarchiveContact(12345);
+   * @see https://docs.virtuous.org/api-reference/contact/unarchive-a-contact
+   * @param {number} contactId - Contact id.
+   * @returns {Promise<void>} Resolved API payload.
    */
   unarchiveContact: (contactId: number) =>
     client.put<void>(`/Contact/Unarchive/${contactId}`).then(() => undefined),
 
   /**
-   * Toggle the follow status of a contact
-   * @param contactId - The ID of the contact
-   * @returns void
-   * @example
-   * await virtuous.contact.toggleFollowContact(12345);
+   * Toggle follow on a contact
+   * @see https://docs.virtuous.org/api-reference/contact/update-whether-the-user-is-following-a-contact
+   * @param {number} contactId - Contact id.
+   * @returns {Promise<void>} Resolved API payload.
    */
   toggleFollowContact: (contactId: number) =>
     client.post<void>(`/Contact/ToggleFollow/${contactId}`).then(() => undefined),
 
   // ── Contact Query ─────────────────────────────────────────────────────
   /**
-   * Query contacts and return a list of contacts with abbreviated details
-   * @param request - The request query object
-   * @param params - The parameters for the request to paginate and sort the results
-   * @returns List of contacts with abbreviated details
-   * @example
-   * const contacts = await virtuous.contact.queryContactsWithAbbreviatedDetails({ search: "Sarah" });
+   * Query contacts (abbreviated)
+   * @see https://docs.virtuous.org/api-reference/contact/request-contacts-with-a-custom-query
+   * @param {ContactQueryGeolocationRequest} request - Query body.
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
    */
   queryContactsWithAbbreviatedDetails: (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) =>
     client.post<ContactListResponse<ContactListItem>>('/Contact/Query', request, { params }).then((r) => r.data),
 
   /**
-   * Query contacts and return a list of contacts with full details
-   * @param request - The request query object
-   * @param params - The parameters for the request to paginate and sort the results
-   * @returns List of contacts with full details
-   * @example
-   * const contacts = await virtuous.contact.queryContactsWithFullDetails({ search: "Sarah" });
+   * Query contacts (full)
+   * @see https://docs.virtuous.org/api-reference/contact/request-contacts-with-a-custom-query-1
+   * @param {ContactQueryGeolocationRequest} request - Query body.
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ContactListResponse<Contact>>} Resolved API payload.
    */
   queryContactsWithFullDetails: (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) =>
     client.post<ContactListResponse<Contact>>('/Contact/Query/FullContact', request, { params }).then((r) => r.data),
 
   /**
-   * Get the contact query options
-   * @returns Contact query options
-   * @example
-   * const options = await virtuous.contact.queryContactOptions();
+   * Get contact query options
+   * @see https://docs.virtuous.org/api-reference/contact/request-query-options-to-build-a-query-for-contacts
+   * @returns {Promise<QueryOptionsResponse>} Resolved API payload.
    */
   queryContactOptions: () =>
     client.get<QueryOptionsResponse>('/Contact/QueryOptions').then((r) => r.data),
 
   // ── Receipts ──────────────────────────────────────────────────────────
   /**
-   * Get the receipts for a contact
-   * @param params - The email address for the request and parameters to sort and paginate the results
-   * @returns List of receipts for the contact
-   * @example
-   * const receipts = await virtuous.contact.getReceipts({ email: "sarah@example.com" });
+   * Get receipts for a contact email
+   * @see https://docs.virtuous.org/api-reference/contact/get-receipts
+   * @param {EmailSkipTakeParams} [params] - Email + pagination.
+   * @returns {Promise<ReceiptListResponse>} Resolved API payload.
    */
   getReceipts: (params?: EmailSkipTakeParams) =>
     client.get<ReceiptListResponse>('/Contact/Receipts', { params }).then((r) => r.data),
 
   /**
-   * Get the receipt PDF by ID
-   * @param receiptId - The ID of the receipt
-   * @returns the receipt PDF
-   * @example
-   * const receiptPdf = await virtuous.contact.getReceiptPdfById(12345);
+   * Get receipt PDF
+   * @see https://docs.virtuous.org/api-reference/contact/get-receipt
+   * @param {number} receiptId - Receipt id.
+   * @returns {Promise<Blob>} Resolved API payload.
    */
   getReceiptPdfById: (receiptId: number) =>
     client

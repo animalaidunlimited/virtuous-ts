@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
-A lightweight, fully-typed TypeScript client library for the [Virtuous CRM API](https://www.virtuoussoftware.com/).
+A lightweight, fully-typed TypeScript client library for the [Virtuous CRM API](https://www.virtuoussoftware.com/), aligned with the [API reference](https://docs.virtuous.org/api-reference/). JSDoc contains links to the matching Virtuous reference page for each API call.
 
 **Features:**
 - Type-safe clients for Gifts, Recurring Gifts, Planned Gifts, Contacts, and Contact Addresses
@@ -145,8 +145,10 @@ await virtuous.plannedGift.updatePlannedGiftSafely(plannedGiftId, {
 - `virtuous.plannedGift` - Planned gifts / pledges
 - `virtuous.contact` - Contacts, search, receipts
 - `virtuous.contactAddresses` - Contact address CRUD
+- `virtuous.project` - Projects
+- `virtuous.contactNote` - Contact notes
 
-See the full [type definitions](src/types/) and JSDoc in source for complete API.
+See [type definitions](src/types/) and JSDoc in source, or `src/index.ts` for exports.
 
 ### Error Handling
 
@@ -213,6 +215,7 @@ graph TD
     Axios --> Recurring[".recurringGift<br/>src/client/recurring-gift.ts"]
     Axios --> Planned[".plannedGift<br/>src/client/planned-gift.ts"]
     Axios --> Contact[".contact + .contactAddresses"]
+    Axios --> Project[".project + .contactNote"]
     Client --> Types["Strongly typed DTOs + Zod validation<br/>src/types/** + src/utils/*Query.ts"]
 ```
 

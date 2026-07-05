@@ -14,3 +14,20 @@ tests/*.d.ts
 tests/*.map
 tests/*.js.map
 tests/*.d.ts.map
+
+# --- Dev / maintainer helpers (local only; not for main / npm consumers) ---
+# Workflow: Hermes skill virtuous-crm-sdk. Keep main = src, tests, Readme, package — consumer SDK only.
+
+docs/
+scripts/
+
+# Virtuous API discovery manifests (sidebar nav, llms diffs — edit in ~/.hermes/skills/.../references/)
+sidebar-nav-endpoints.tsv
+**/sidebar-nav-endpoints.tsv
+diff-llms-only.txt
+**/diff-llms-only.txt
+diff-nav-only.txt
+**/diff-nav-only.txt
+**/llms.txt
+*.sidebar.html
+**/api-reference-sidebar*.html

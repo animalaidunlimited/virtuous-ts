@@ -22,7 +22,7 @@ import { QueryRequest } from '../types/shared/query';
  * Only the fields that are being updated should be included in the changes object.
  *
  * @example
- * await virtuous.plannedGift.updatePlannedGiftSafely(12345, { anticipatedAmount: 1000 });
+ * await virtuous.plannedGift.updatePlannedGiftSafely(1, { anticipatedAmount: 500 });
  */
 const createPlannedGiftClient = (client: AxiosInstance) => {
   const convertPlannedGiftToUpdateRequest = (plannedGift: PlannedGift): UpdatePlannedGiftRequest => {
@@ -62,19 +62,17 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Create ─────────────────────────────────────────────────────────────
     /**
      * Create a planned gift
-     *
-     * @param request - The create planned gift request object
-     * @returns The created planned gift object
+     * @see https://docs.virtuous.org/api-reference/planned-gift/created-a-new-planned-gift
+     * @param {CreatePlannedGiftRequest} request - Create body.
+     * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.createPlannedGift(
-     *   { 
-     *     contactId: 12345, 
-     *     plannedGiftDate: '2025-11-28', 
-     *     plannedGiftType: 'Cash', 
-     *     frequency: 'Monthly', 
-     *     anticipatedAmount: 1000 
-     *   }
-     * );
+     * await virtuous.plannedGift.createPlannedGift({
+     *   contactId: 1,
+     *   plannedGiftDate: '2026-01-01',
+     *   plannedGiftType: 'Cash',
+     *   frequency: 'Monthly',
+     *   anticipatedAmount: 100,
+     * });
      */
     createPlannedGift: (request: CreatePlannedGiftRequest): Promise<PlannedGift> =>
       client.post<PlannedGift>('/PlannedGift', request).then((r) => r.data),
@@ -82,12 +80,12 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Read ─────────────────────────────────────────────────────────────
     /**
      * Get planned gifts for a contact
-     *
-     * @param contactId - The ID of the contact to get planned gifts for
-     * @param params - Optional skip/take for pagination
-     * @returns The planned gift list response object
+     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-planned-gifts-for-the-specified-contact
+     * @param {number} contactId - Contact id.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<PlannedGiftListResponse>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.getPlannedGiftsForContact(12345);
+     * await virtuous.plannedGift.getPlannedGiftsForContact(1, { skip: 0, take: 10 });
      */
     getPlannedGiftsForContact: (
       contactId: number,
@@ -99,12 +97,12 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
 
     /**
-     * Get a planned gift by ID
-     *
-     * @param id - The ID of the planned gift
-     * @returns The planned gift object
+     * Get planned gift by id
+     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-specified-planned-gift
+     * @param {number} id - Planned gift id.
+     * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.getPlannedGiftById(12345);
+     * await virtuous.plannedGift.getPlannedGiftById(1);
      */
     getPlannedGiftById: (id: number): Promise<PlannedGift> =>
       client.get<PlannedGift>(`/PlannedGift/${id}`).then((r) => r.data),
@@ -112,12 +110,12 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get gifts applied to a planned gift
-     *
-     * @param plannedGiftId - The ID of the planned gift to get gifts applied to
-     * @param params - Optional skip/take for pagination
-     * @returns The gifts applied to the planned gift response object
+     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-gifts-applied-to-the-specified-planned-gift
+     * @param {number} plannedGiftId - Planned gift id.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<GiftsAppliedToPlannedGiftResponse>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.getGiftsAppliedToPlannedGift(12345);
+     * await virtuous.plannedGift.getGiftsAppliedToPlannedGift(1);
      */
     getGiftsAppliedToPlannedGift: (
       plannedGiftId: number,
@@ -131,33 +129,26 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Update ─────────────────────────────────────────────────────────────
     /**
      * Update a planned gift
-     *
-     * @param id - The ID of the planned gift to update
-     * @param request - The update planned gift request object
-     * @returns The updated planned gift object
+     * @see https://docs.virtuous.org/api-reference/planned-gift/updates-a-planned-gift
+     * @param {number} id - Planned gift id.
+     * @param {UpdatePlannedGiftRequest} request - Full update body.
+     * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.updatePlannedGift(12345, { anticipatedAmount: 1000 });
-     * 
-     * Not recommended to use this method directly. Use updatePlannedGiftSafely() instead.
+     * await virtuous.plannedGift.updatePlannedGift(1, fullUpdateRequest);
      *
-     * Virtuous will not accept a planned gift update request with only the fields that are being updated.
-     * The request object must be fully populated with all fields, even if only one field is being updated.
-     * And any unset properties will be deleted.
-     *
-     * Use updatePlannedGiftSafely() to safely update a planned gift with a single field update.
-     *
+     * Prefer {@link updatePlannedGiftSafely} for partial updates — Virtuous expects a fully populated body on PUT.
      */
     updatePlannedGift: (id: number, request: UpdatePlannedGiftRequest): Promise<PlannedGift> =>
       client.put<PlannedGift>(`/PlannedGift/${id}`, request).then((r) => r.data),
 
     /**
-     * Update a planned gift safely
-     *
-     * @param plannedGiftId - The ID of the planned gift to update
-     * @param changes - The changes to apply to the update planned gift request object
-     * @returns The updated planned gift object
+     * Update a planned gift (merge changes)
+     * @see https://docs.virtuous.org/api-reference/planned-gift/updates-a-planned-gift
+     * @param {number} plannedGiftId - Planned gift id.
+     * @param {Partial<UpdatePlannedGiftRequest>} changes - Fields to merge.
+     * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.updatePlannedGiftSafely(12345, { anticipatedAmount: 1000 });
+     * await virtuous.plannedGift.updatePlannedGiftSafely(1, { anticipatedAmount: 500 });
      */
     updatePlannedGiftSafely: async (
       plannedGiftId: number,
@@ -177,9 +168,9 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     // ── Query ─────────────────────────────────────────────────────────────
     /**
-     * Get query options for planned gifts
-     *
-     * @returns The query options response object
+     * Get planned gift query options
+     * @see https://docs.virtuous.org/api-reference/planned-gift/request-query-options-to-build-a-query-for-planned-gifts
+     * @returns {Promise<QueryOptionsResponse>} Resolved API payload.
      * @example
      * await virtuous.plannedGift.getPlannedGiftQueryOptions();
      */
@@ -189,17 +180,13 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Query planned gifts
-     *
-     * @param request - The query request object
-     * @param params - Optional skip/take for pagination
-     * @returns The planned gift list response object
+     * @see https://docs.virtuous.org/api-reference/planned-gift/request-planned-gifts-with-a-custom-query
+     * @param {QueryRequest} request - Query body.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<PlannedGiftListResponse>} Resolved API payload.
      * @example
-     * await virtuous.plannedGift.queryPlannedGifts(buildPlannedGiftQuery({ anticipatedAmount: 1000 }));
-     * 
-     * Use buildPlannedGiftQuery() simple helper function to build the request query object.
-     * 
-     * @example
-     * const query = buildPlannedGiftQuery({ anticipatedAmount: 1000 });
+     * import { buildPlannedGiftQuery } from 'virtuous-ts';
+     * const query = buildPlannedGiftQuery({ anticipatedAmount: 100 });
      * await virtuous.plannedGift.queryPlannedGifts(query, { skip: 0, take: 10 });
      */
     queryPlannedGifts: (request: QueryRequest, params?: SkipTakeParams): Promise<PlannedGiftListResponse> =>
