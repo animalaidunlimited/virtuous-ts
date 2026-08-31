@@ -1,7 +1,7 @@
 {
   "name": "virtuous-ts",
-  "version": "0.4.0",
-  "description": "A lightweight, type-safe TypeScript client for the Virtuous CRM API. Includes support for gifts, recurring gifts, planned gifts, contacts, addresses, query builders, and safe update helpers.",
+  "version": "0.5.0",
+  "description": "A lightweight, type-safe TypeScript client for the Virtuous CRM API. Includes support for gifts, recurring gifts, planned gifts, contacts, addresses, contact tags, email lists, query builders, and safe update helpers.",
   "repository": {
     "type": "git",
     "url": "https://github.com/animalaidunlimited/virtuous-ts.git"
@@ -24,6 +24,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "echo '⚠️  WARNING: Tests hit LIVE Virtuous CRM data (creates/modifies contacts, gifts, etc). Requires valid VIRTUOUS_API_KEY in .env. Not suitable for automated CI without mocks. Use npm run test:all to run.\\n\\nSee tests/README or individual test files for details.'",
+    "test:unit": "VITEST_UNIT_ONLY=1 vitest run tests/unit",
     "test:all": "vitest run 01 02 03 04 05",
     "test:watch": "vitest watch",
     "test:ui": "vitest 01 02 03 04 05 --ui",

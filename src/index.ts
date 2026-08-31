@@ -155,6 +155,39 @@ export {
   buildGeneralContactNoteInput,
 } from './types/contact-note/create-contact-note';
 
+// ── Contact Tag ───────────────────────────────
+export type {
+  Tag,
+  ContactTag,
+  CreateContactTagRequest,
+  TagSearchBody,
+  TagListResponse,
+  ContactTagListResponse,
+  TagListParams,
+} from './types/contact-tag/contact-tag';
+
+// ── Email List ────────────────────────────────
+export type {
+  EmailList,
+  AddIndividualsToEmailListRequest,
+  AddIndividualsToEmailListResult,
+  EmailListSearchBody,
+  EmailListMembership,
+  EmailListSearchResponse,
+  EmailListMembershipListResponse,
+  EmailListListParams,
+} from './types/email-list/email-list';
+
+// ── Audience helpers ──────────────────────────
+export type {
+  AudienceSkipReason,
+  AudienceSkip,
+  AddEmailsToTagResult,
+  AddEmailsToEmailListResult,
+} from './utils/add-emails-to-audience';
+export { addEmailsToTag } from './utils/add-emails-to-tag';
+export { addEmailsToEmailList } from './utils/add-emails-to-email-list';
+
 
 // ── Receipts ────────────────────────────────
 export type { ReceiptListResponse } from './types/contact/contact-receipts';

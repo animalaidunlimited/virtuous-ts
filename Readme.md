@@ -9,9 +9,10 @@
 A lightweight, fully-typed TypeScript client library for the [Virtuous CRM API](https://www.virtuoussoftware.com/), aligned with the [API reference](https://docs.virtuous.org/api-reference/). JSDoc contains links to the matching Virtuous reference page for each API call.
 
 **Features:**
-- Type-safe clients for Gifts, Recurring Gifts, Planned Gifts, Contacts, and Contact Addresses
+- Type-safe clients for Gifts, Recurring Gifts, Planned Gifts, Contacts, Contact Addresses, Contact Tags, Email Lists, and Individuals
 - Query builder helpers for complex searches
 - `update*Safely()` helpers to handle Virtuous' requirement for full objects on updates
+- Helpers to apply an existing tag, or add individuals to an existing email list, from a list of email addresses
 - Centralized error handling with `VirtuousApiError`
 - Zero dependencies beyond `axios` and `zod`
 
@@ -138,6 +139,29 @@ await virtuous.plannedGift.updatePlannedGiftSafely(plannedGiftId, {
 });
 ```
 
+### Tags and Email Lists
+
+Virtuous does not expose APIs to create tags or email lists. Create them in the CRM first, then look them up by name.
+
+`addEmailsToTag()` applies an existing tag to each **contact** found by email. `addEmailsToEmailList()` adds each matching **individual** to an existing email list in a single bulk request. Addresses that are not already in Virtuous are returned in `skipped`; contacts are not created.
+
+Adding individuals to an email list is queued by Virtuous and can take up to four hours, so results may not appear immediately. Call `addEmailsToEmailList()` once with the full list of addresses — not once per email. Virtuous sends list mail to each individual's primary email address.
+
+```typescript
+import { addEmailsToTag, addEmailsToEmailList } from 'virtuous-ts';
+
+const emails = [
+  'sarah@example.com',
+  'james@example.com',
+];
+
+const tags = await virtuous.contactTag.searchTags({ search: 'August Briefing' });
+const tagged = await addEmailsToTag(virtuous, tags.list[0].id, emails);
+
+const lists = await virtuous.emailList.searchEmailLists({ search: 'August Briefing' });
+const queued = await addEmailsToEmailList(virtuous, lists.list[0].emailListId, emails);
+```
+
 ### Available Clients
 
 - `virtuous.gift` - Gifts and gift transactions
@@ -145,6 +169,9 @@ await virtuous.plannedGift.updatePlannedGiftSafely(plannedGiftId, {
 - `virtuous.plannedGift` - Planned gifts / pledges
 - `virtuous.contact` - Contacts, search, receipts
 - `virtuous.contactAddresses` - Contact address CRUD
+- `virtuous.contactIndividual` - Individuals (find by email, query)
+- `virtuous.contactTag` - Contact tags
+- `virtuous.emailList` - Email lists
 - `virtuous.project` - Projects
 - `virtuous.contactNote` - Contact notes
 
@@ -214,7 +241,8 @@ graph TD
     Axios --> Gift[".gift<br/>src/client/gift.ts"]
     Axios --> Recurring[".recurringGift<br/>src/client/recurring-gift.ts"]
     Axios --> Planned[".plannedGift<br/>src/client/planned-gift.ts"]
-    Axios --> Contact[".contact + .contactAddresses"]
+    Axios --> Contact[".contact + .contactAddresses + .contactIndividual"]
+    Axios --> TagEmail[".contactTag + .emailList"]
     Axios --> Project[".project + .contactNote"]
     Client --> Types["Strongly typed DTOs + Zod validation<br/>src/types/** + src/utils/*Query.ts"]
 ```

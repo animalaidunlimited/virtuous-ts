@@ -7,6 +7,9 @@ import createRecurringGiftClient from './client/recurring-gift';
 import createPlannedGiftClient from './client/planned-gift';
 import createProjectClient from './client/project';
 import createContactNoteClient from './client/contact-note';
+import createContactTagClient from './client/contact-tag';
+import createEmailListClient from './client/email-list';
+import createContactIndividualClient from './client/contact-individual';
 
 export interface VirtuousConfig {
   baseURL: string;
@@ -45,6 +48,9 @@ export class VirtuousClient {
   public plannedGift: ReturnType<typeof createPlannedGiftClient>;
   public project: ReturnType<typeof createProjectClient>;
   public contactNote: ReturnType<typeof createContactNoteClient>;
+  public contactTag: ReturnType<typeof createContactTagClient>;
+  public emailList: ReturnType<typeof createEmailListClient>;
+  public contactIndividual: ReturnType<typeof createContactIndividualClient>;
 
   constructor(virtuousConfig: VirtuousConfig) {
     if (!virtuousConfig.apiKey) {
@@ -85,6 +91,9 @@ export class VirtuousClient {
     this.plannedGift = createPlannedGiftClient(this.client);
     this.project = createProjectClient(this.client);
     this.contactNote = createContactNoteClient(this.client);
+    this.contactTag = createContactTagClient(this.client);
+    this.emailList = createEmailListClient(this.client);
+    this.contactIndividual = createContactIndividualClient(this.client);
   }
 
   public setTimeout(ms: number) {
