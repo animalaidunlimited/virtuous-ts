@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1
+
+Dependency and toolchain updates. No public API changes.
+
+- Runtime: `axios` 1.20.0, `zod` 4.5.4.
+- Dev: TypeScript 7.0.2, Vitest 4.1.11, `@types/node` 26.4.1.
+- TypeScript 7 requires `module: "Node16"` / `moduleResolution: "node16"` and no longer accepts `baseUrl`.
+- Removed unused `ts-node` dev dependency.
+- Vitest configs are `.mts` so Vite can load them as ESM in this CommonJS package.
+
 ## 1.0.0
 
 First stable public API. Clients, types, and JSDoc follow the Postman collection at [docs.virtuoussoftware.com](https://docs.virtuoussoftware.com/).

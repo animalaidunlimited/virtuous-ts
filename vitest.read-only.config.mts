@@ -1,5 +1,8 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+
+const root = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Live GET / Query / Search suite. Must not load tests/global-setup.ts
@@ -23,7 +26,7 @@ export default defineConfig({
       hooks: 'list',
     },
     alias: {
-      'virtuous-ts': path.resolve(__dirname, './src'),
+      'virtuous-ts': path.resolve(root, './src'),
     },
   },
 });

@@ -1,6 +1,6 @@
 {
   "name": "virtuous-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type-safe TypeScript client for the Virtuous CRM API: contacts, gifts, campaigns, projects, events, grants, volunteering, tasks, webhooks, query builders, and import/transaction endpoints.",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
     "start": "node dist/index.js",
     "test": "echo '⚠️  WARNING: test:all hits LIVE Virtuous CRM data (creates/modifies contacts, gifts, etc). Requires VIRTUOUS_API_KEY. Not suitable for CI. Use npm run test:unit for mocks, or npm run test:read-only for live GETs and Query/Search only.'",
     "test:unit": "VITEST_UNIT_ONLY=1 vitest run tests/unit",
-    "test:read-only": "vitest run --config vitest.read-only.config.ts",
+    "test:read-only": "vitest run --config vitest.read-only.config.mts",
     "test:all": "vitest run 01 02 03 04 05",
     "test:watch": "vitest watch",
     "test:ui": "vitest 01 02 03 04 05 --ui",
@@ -50,16 +50,15 @@
   "type": "commonjs",
   "sideEffects": false,
   "dependencies": {
-    "axios": "^1.18.1",
-    "zod": "^4.4.3"
+    "axios": "^1.20.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@types/node": "^24.13.2",
-    "@vitest/coverage-v8": "^4.1.9",
-    "@vitest/ui": "^4.1.9",
+    "@types/node": "^26.4.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/ui": "^4.1.11",
     "dotenv": "^17.4.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.9"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
