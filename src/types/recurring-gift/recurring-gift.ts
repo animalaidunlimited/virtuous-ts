@@ -1,4 +1,3 @@
-
 import { RecurringGiftFrequency } from "../shared/gift-frequency";
 
 export interface RecurringGiftDesignation {

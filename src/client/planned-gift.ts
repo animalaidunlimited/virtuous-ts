@@ -6,6 +6,7 @@ import { UpdatePlannedGiftRequest } from '../types/planned-gift/planned-gift-upd
 import { GiftsAppliedToPlannedGiftResponse } from '../types/planned-gift/planned-gift-applied-gifts';
 import { QueryOptionsResponse } from '../types/shared/query-options';
 import { QueryRequest } from '../types/shared/query';
+import type { CustomFieldDefinition } from '../types/shared/custom-field-definition';
 
 /**
  * Planned Gift API client
@@ -62,7 +63,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Create ─────────────────────────────────────────────────────────────
     /**
      * Create a planned gift
-     * @see https://docs.virtuous.org/api-reference/planned-gift/created-a-new-planned-gift
+     * @see https://docs.virtuoussoftware.com/#89589b0b-90a1-4110-be58-287b52d5ae9e
      * @param {CreatePlannedGiftRequest} request - Create body.
      * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
@@ -80,7 +81,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Read ─────────────────────────────────────────────────────────────
     /**
      * Get planned gifts for a contact
-     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-planned-gifts-for-the-specified-contact
+     * @see https://docs.virtuoussoftware.com/
      * @param {number} contactId - Contact id.
      * @param {SkipTakeParams} [params] - Pagination.
      * @returns {Promise<PlannedGiftListResponse>} Resolved API payload.
@@ -98,7 +99,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get planned gift by id
-     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-specified-planned-gift
+     * @see https://docs.virtuoussoftware.com/#0e3d3318-6cf2-454f-8c54-df18bf87906a
      * @param {number} id - Planned gift id.
      * @returns {Promise<PlannedGift>} Resolved API payload.
      * @example
@@ -110,7 +111,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get gifts applied to a planned gift
-     * @see https://docs.virtuous.org/api-reference/planned-gift/gets-the-gifts-applied-to-the-specified-planned-gift
+     * @see https://docs.virtuoussoftware.com/
      * @param {number} plannedGiftId - Planned gift id.
      * @param {SkipTakeParams} [params] - Pagination.
      * @returns {Promise<GiftsAppliedToPlannedGiftResponse>} Resolved API payload.
@@ -122,14 +123,14 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
       params?: SkipTakeParams,
     ): Promise<GiftsAppliedToPlannedGiftResponse> =>
       client
-        .get<GiftsAppliedToPlannedGiftResponse>(`/PlannedGift/GiftsApplied/${plannedGiftId}`, { params })
+        .get<GiftsAppliedToPlannedGiftResponse>(`/PlannedGift/${plannedGiftId}/Gifts`, { params })
         .then((r) => r.data),
 
 
     // ── Update ─────────────────────────────────────────────────────────────
     /**
      * Update a planned gift
-     * @see https://docs.virtuous.org/api-reference/planned-gift/updates-a-planned-gift
+     * @see https://docs.virtuoussoftware.com/#f789ed15-031c-4849-85ba-1c90e43343e7
      * @param {number} id - Planned gift id.
      * @param {UpdatePlannedGiftRequest} request - Full update body.
      * @returns {Promise<PlannedGift>} Resolved API payload.
@@ -143,7 +144,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Update a planned gift (merge changes)
-     * @see https://docs.virtuous.org/api-reference/planned-gift/updates-a-planned-gift
+     * @see https://docs.virtuoussoftware.com/#0e3d3318-6cf2-454f-8c54-df18bf87906a
      * @param {number} plannedGiftId - Planned gift id.
      * @param {Partial<UpdatePlannedGiftRequest>} changes - Fields to merge.
      * @returns {Promise<PlannedGift>} Resolved API payload.
@@ -169,7 +170,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
     // ── Query ─────────────────────────────────────────────────────────────
     /**
      * Get planned gift query options
-     * @see https://docs.virtuous.org/api-reference/planned-gift/request-query-options-to-build-a-query-for-planned-gifts
+     * @see https://docs.virtuoussoftware.com/#5e8a7cbf-b868-4c70-82a7-1a5695884355
      * @returns {Promise<QueryOptionsResponse>} Resolved API payload.
      * @example
      * await virtuous.plannedGift.getPlannedGiftQueryOptions();
@@ -180,7 +181,7 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
 
     /**
      * Query planned gifts
-     * @see https://docs.virtuous.org/api-reference/planned-gift/request-planned-gifts-with-a-custom-query
+     * @see https://docs.virtuoussoftware.com/#3ea34f6e-61b3-4a8e-a6db-1f6de672d9fc
      * @param {QueryRequest} request - Query body.
      * @param {SkipTakeParams} [params] - Pagination.
      * @returns {Promise<PlannedGiftListResponse>} Resolved API payload.
@@ -193,6 +194,14 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
       client.post<PlannedGiftListResponse>('/PlannedGift/Query', request, { params }).then((r) => r.data),
 
     convertPlannedGiftToUpdateRequest,
+
+    /**
+     * Returns enabled custom fields for planned gifts.
+     * @see https://docs.virtuoussoftware.com/#ae63530d-f44e-43a3-b014-3d5887381723
+     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+     */
+    getPlannedGiftCustomFields: () =>
+      client.get<CustomFieldDefinition[]>('/PlannedGift/CustomFields').then((r) => r.data),
   };
 };
 

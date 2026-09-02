@@ -12,8 +12,8 @@ import {
 } from './query-builder-helpers';
 
 export interface SimpleGiftFilters {
-  // Date range
-  giftDateFrom?: string; // "2023-01-01"
+  // Date range (YYYY-MM-DD or M/D/YYYY)
+  giftDateFrom?: string;
   giftDateTo?: string;
   giftDateYear?: string | number;
 
@@ -186,7 +186,7 @@ export const buildGiftQuery = (filters: SimpleGiftFilters): QueryRequest => {
 
   return {
     groups: conditions.length ? [{ conditions }] : [],
-    SortBy: filters.sortBy,
-    Descending: filters.descending,
+    sortBy: filters.sortBy,
+    descending: filters.descending,
   };
 };

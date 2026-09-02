@@ -1,4 +1,3 @@
-
 export type RecurringGiftFrequency =
   | 'Weekly'
   | 'Bimonthly'

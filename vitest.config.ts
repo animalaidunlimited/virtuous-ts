@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     hookTimeout: 60000, // 60 seconds for hooks (beforeAll, etc.)
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/*.test.ts', 'tests/unit/**/*.test.ts'],
     coverage: {
       reporter: ['text', 'html', 'lcov'],
       exclude: ['node_modules', 'dist', 'tests/**'],

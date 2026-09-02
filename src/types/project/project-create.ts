@@ -1,6 +1,6 @@
 /**
  * Request body for `POST /api/Project`.
- * @see https://docs.virtuous.org/api-reference/project/create-project
+ * @see https://docs.virtuoussoftware.com/
  */
 export interface CreateProjectRequest {
   name: string;

@@ -34,7 +34,7 @@ export interface RecurringGiftPaymentUpdate {
   state?: State;
 }
 
-/** Main request body for PATCH /Gift/{id} */
+/** Main request body for PUT /Gift/{id}. PATCH /Gift is the bulk update endpoint. */
 export interface UpdateGiftRequest {
   // Core fields
   giftType?: GiftType;

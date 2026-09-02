@@ -1,4 +1,3 @@
-
 export interface RecurringGiftCustomFieldDefinition {
     dataType: string;                     // e.g. "Text", "Date", "Dropdown", "Number"
     name: string;                         // internal name (machine-friendly)

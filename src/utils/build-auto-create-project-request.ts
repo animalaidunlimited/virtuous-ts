@@ -4,7 +4,7 @@ export type { CreateProjectRequest, CreateProjectOptions } from '../types/projec
 
 /**
  * Request body for auto-creating a missing Virtuous project (integration default field values).
- * @see https://docs.virtuous.org/api-reference/project/create-project
+ * @see https://docs.virtuoussoftware.com/
  * @param {string} projectName - Project name and default revenue accounting code.
  * @param {string} [description] - Project description.
  * @returns {CreateProjectRequest} Body ready for {@link VirtuousClient.project.createProject}.

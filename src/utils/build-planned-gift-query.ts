@@ -141,8 +141,8 @@ const buildPlannedGiftQuery = (filters: SimplePlannedGiftFilters): QueryRequest 
 
   return {
     groups: conditions.length ? [{ conditions }] : [],
-    SortBy: filters.sortBy,
-    Descending: filters.descending,
+    sortBy: filters.sortBy,
+    descending: filters.descending,
   };
 };
 export { buildPlannedGiftQuery };

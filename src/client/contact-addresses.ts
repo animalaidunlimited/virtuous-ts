@@ -4,6 +4,7 @@ import type {
   CreateContactAddressRequest,
   UpdateContactAddressRequest,
 } from '../types/contact/contact-address-create';
+import { addressToUpdateRequest, mergeUpdate } from '../utils/to-update-request';
 
 /**
  * Contact Address API client
@@ -41,7 +42,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
   // ── List & Get ────────────────────────────────────────────────────────
   /**
    * Get addresses for a contact
-   * @see https://docs.virtuous.org/api-reference/contact-address/gets-the-contact-addresses-for-the-specified-contact
+   * @see https://docs.virtuoussoftware.com/#7b216277-1272-43f6-8001-7f0f466112b3
    * @param {number} contactId - Contact id.
    * @returns {Promise<ContactAddressFull[]>} Resolved API payload.
    */
@@ -50,7 +51,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
 
   /**
    * Get address by id
-   * @see https://docs.virtuous.org/api-reference/contact-address/gets-the-specified-contact-address
+   * @see https://docs.virtuoussoftware.com/#a1ec3ed7-929a-4fc1-99f6-ec60fcfc4072
    * @param {number} addressId - Address id.
    * @returns {Promise<ContactAddressFull>} Resolved API payload.
    */
@@ -60,7 +61,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
   // ── Create / Update ───────────────────────────────────────────────────
   /**
    * Create a contact address
-   * @see https://docs.virtuous.org/api-reference/contact-address/creates-a-new-contact-address
+   * @see https://docs.virtuoussoftware.com/#57b822b2-7c3a-4672-9a81-7fd2f8c29dc9
    * @param {CreateContactAddressRequest} request - Create body.
    * @returns {Promise<ContactAddressFull>} Resolved API payload.
    */
@@ -69,7 +70,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
 
   /**
    * Update a contact address
-   * @see https://docs.virtuous.org/api-reference/contact-address/updates-contact-address
+   * @see https://docs.virtuoussoftware.com/#aa611560-0112-4362-929f-d4789ab70885
    * @param {number} addressId - Address id.
    * @param {UpdateContactAddressRequest} request - Update body.
    * @returns {Promise<ContactAddressFull>} Resolved API payload.
@@ -77,10 +78,27 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
   updateAddress: (addressId: number, request: UpdateContactAddressRequest) =>
     client.put<ContactAddressFull>(`/ContactAddress/${addressId}`, request).then((r) => r.data),
 
+  /**
+   * GETs the address, merges `changes`, then PUTs the full update body.
+   * @see https://docs.virtuoussoftware.com/#aa611560-0112-4362-929f-d4789ab70885
+   * @param {number} addressId - Address id.
+   * @param {Partial<UpdateContactAddressRequest>} changes - Fields to change.
+   * @returns {Promise<ContactAddressFull>} The updated address.
+   */
+  updateAddressSafely: async (addressId: number, changes: Partial<UpdateContactAddressRequest>) => {
+    const current = await client.get<ContactAddressFull>(`/ContactAddress/${addressId}`).then((r) => r.data);
+    return client
+      .put<ContactAddressFull>(
+        `/ContactAddress/${addressId}`,
+        mergeUpdate(addressToUpdateRequest(current), changes),
+      )
+      .then((r) => r.data);
+  },
+
   // ── Archive / Unarchive / Delete ──────────────────────────────────────
   /**
    * Archive an address
-   * @see https://docs.virtuous.org/api-reference/contact-address/archive-a-contact-address
+   * @see https://docs.virtuoussoftware.com/#a6caa2c5-78dc-40db-a9f1-7d2e71ad815d
    * @param {number} addressId - Address id.
    * @returns {Promise<void>} Resolved API payload.
    */
@@ -89,7 +107,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
 
   /**
    * Unarchive an address
-   * @see https://docs.virtuous.org/api-reference/contact-address/unarchive-a-contact-address
+   * @see https://docs.virtuoussoftware.com/#52af925f-6221-4660-a7fa-e5eaa5923cde
    * @param {number} addressId - Address id.
    * @returns {Promise<void>} Resolved API payload.
    */
@@ -98,7 +116,7 @@ const createContactAddressesClient = (client: AxiosInstance) => ({
 
   /**
    * Delete an address
-   * @see https://docs.virtuous.org/api-reference/contact-address/deletes-the-specified-contact-address
+   * @see https://docs.virtuoussoftware.com/#189fb0a3-45ac-46eb-9ee9-b770d93e5d7f
    * @param {number} addressId - Address id.
    * @returns {Promise<void>} Resolved API payload.
    */

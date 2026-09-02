@@ -6,8 +6,7 @@ import { addSimpleCondition, addArrayCondition, addContainsCondition } from './q
 
 
 /**
- * Simple, readable filters for buildContactQuery()
- *
+ * Filters for {@link buildContactQuery}.
  */
 export interface SimpleContactFilters {
     firstNameIs?: string;
@@ -32,24 +31,18 @@ export interface SimpleContactFilters {
   }
   
   /**
-   * Build a valid Contact Query request for Virtuous's /Contact/Query endpoint
+   * Builds a contact query body for `POST /Contact/Query`.
    *
-   * Converts simple, readable filters into the exact JSON body Virtuous expects.
-   *
-   * @param filters - Simple filter object
-   * @returns Fully-formed ContactQueryRequest ready for queryContacts()
+   * @param filters - Field filters and sort options. Pagination is the query method's second argument.
+   * @returns Query body for {@link VirtuousClient.contact.queryContactsWithAbbreviatedDetails}.
    *
    * @example
-   * // Contacts with "John" in their first name, newest first
    * const query = buildContactQuery({
-   *   firstName: "John",
-   *   sortBy: "LastModifiedDate",
+   *   firstNameIs: 'John',
+   *   sortBy: 'Name',
    *   descending: true,
    * });
-   *
-   * const results = await virtuous.contact.queryContacts(query);
-   *
-   *
+   * const results = await virtuous.contact.queryContactsWithAbbreviatedDetails(query);
    */
   export const buildContactQuery = (filters: SimpleContactFilters): ContactQueryGeolocationRequest => {
     const conditions: QueryCondition[] = [];

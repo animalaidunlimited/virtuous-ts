@@ -1,4 +1,3 @@
-
   export type GiftFrequency =
   | 'OneTime'
   | 'Weekly'

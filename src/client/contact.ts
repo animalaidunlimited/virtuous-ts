@@ -15,7 +15,19 @@ import type {
 } from '../types/contact/contact-params';
 import type { CreateContactRequest } from '../types/contact/contact-create';
 import type { UpdateContactRequest } from '../types/contact/contact-update';
-import type { ReceiptListResponse } from '../types/contact/contact-receipts';
+import { contactToUpdateRequest, mergeUpdate } from '../utils/to-update-request';
+import type { ReceiptFileResponse, ReceiptListResponse } from '../types/contact/contact-receipts';
+import type { FollowedContactActivity } from '../types/contact/contact-activity';
+import type {
+  CreateContactImportRequest,
+  CreateContactTransactionRequest,
+  CreateCustomCollectionInstanceRequest,
+  CustomCollectionDefinition,
+  CustomCollectionInstance,
+} from '../types/contact/contact-transaction';
+import type { CustomFieldDefinition } from '../types/shared/custom-field-definition';
+import type { QueuedImportResponse } from '../types/shared/queued-import';
+import type { ListResponse } from '../types/shared/list-response';
 import type { ContactQueryGeolocationRequest } from '../types/contact/contact-geo-location-query';
 import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { ContactListItem } from '../types/contact/contact';
@@ -40,7 +52,7 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── Single Contact Lookups ─────────────────────────────────────────────
   /**
    * Get a contact by ID
-   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-id
+   * @see https://docs.virtuoussoftware.com/#118355eb-8028-4751-b5ab-151ff0aa2b22
    * @param {number} contactId - Virtuous contact id.
    * @returns {Promise<Contact>} Resolved API payload.
    * @example
@@ -51,7 +63,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Get a contact by reference source and ID
-   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-reference-source-and-id
+   * @see https://docs.virtuoussoftware.com/#0188f30c-9404-4767-a1db-8851250cf6d9
    * @param {string} referenceSource - Reference source.
    * @param {string} referenceId - Reference id.
    * @returns {Promise<Contact>} Resolved API payload.
@@ -60,8 +72,8 @@ const createContactClient = (client: AxiosInstance) => ({
     client.get<Contact>(`/Contact/${referenceSource}/${referenceId}`).then((r) => r.data),
 
   /**
-   * Get a contact by reference ID
-   * @see https://docs.virtuous.org/api-reference/contact/get-contact-by-reference-id
+   * Get a contact by reference ID. HMAC authentication only; API keys may receive 403.
+   * @see https://docs.virtuoussoftware.com/#1b9d2d8a-5b0d-4615-899b-257c07454b78
    * @param {string} referenceId - Reference id.
    * @returns {Promise<ContactLookup>} Resolved API payload.
    */
@@ -71,7 +83,7 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── List & Search ─────────────────────────────────────────────────────
   /**
    * Get contacts by tag ID
-   * @see https://docs.virtuous.org/api-reference/contact/get-contacts-by-tag-id
+   * @see https://docs.virtuoussoftware.com/
    * @param {number} tagId - Tag id.
    * @param {ContactListParams} [params] - Pagination/sort.
    * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
@@ -81,7 +93,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Get contact types
-   * @see https://docs.virtuous.org/api-reference/contact/get-contact-types
+   * @see https://docs.virtuoussoftware.com/#a55a9047-cda1-4a9d-8c79-0b62e2246597
    * @returns {Promise<ContactType[]>} Resolved API payload.
    */
   getContactTypes: () =>
@@ -89,7 +101,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Find a contact by email or reference
-   * @see https://docs.virtuous.org/api-reference/contact/find-a-contact-by-email-address-or-reference-source-and-id
+   * @see https://docs.virtuoussoftware.com/#d4fb962c-c02b-4128-aa62-8f2822dd2e6c
    * @param {EmailOrReferenceParams} params - Lookup query params.
    * @returns {Promise<Contact>} Resolved API payload.
    */
@@ -98,7 +110,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Search contacts
-   * @see https://docs.virtuous.org/api-reference/contact/find-all-contacts-that-match-fully-or-partially-the-given-search-parameters
+   * @see https://docs.virtuoussoftware.com/
    * @param {ContactSearchBody} searchBody - Search body.
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
@@ -108,7 +120,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Search contacts near coordinates
-   * @see https://docs.virtuous.org/api-reference/contact/find-all-contacts-within-a-given-proximity-of-a-geocoordinate
+   * @see https://docs.virtuoussoftware.com/#78cff7bd-04fd-44e5-809f-625b2d63280c
    * @param {GeoCoordinateSearchParams} geoParams - Geo search.
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactGeoResult[]>} Resolved API payload.
@@ -118,8 +130,8 @@ const createContactClient = (client: AxiosInstance) => ({
 
   // ── Create / Update / Archive ─────────────────────────────────────────
   /**
-   * Create a contact
-   * @see https://docs.virtuous.org/api-reference/contact/create-a-new-contact
+   * Creates a contact directly. Does not check for duplicates. Prefer `createContactTransaction`.
+   * @see https://docs.virtuoussoftware.com/#ac338617-d5b2-4ce0-93c5-9921be01ec88
    * @param {CreateContactRequest} request - Create body.
    * @returns {Promise<Contact>} Resolved API payload.
    */
@@ -128,7 +140,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Update a contact
-   * @see https://docs.virtuous.org/api-reference/contact/update-an-existing-contact
+   * @see https://docs.virtuoussoftware.com/#b1903993-cd12-400c-ba44-5ac553ae117c
    * @param {number} contactId - Contact id.
    * @param {UpdateContactRequest} request - Update body.
    * @returns {Promise<Contact>} Resolved API payload.
@@ -137,8 +149,22 @@ const createContactClient = (client: AxiosInstance) => ({
     client.put<Contact>(`/Contact/${contactId}`, request).then((r) => r.data),
 
   /**
+   * GETs the contact, merges `changes`, then PUTs the full update body.
+   * @see https://docs.virtuoussoftware.com/#b1903993-cd12-400c-ba44-5ac553ae117c
+   * @param {number} contactId - Contact id.
+   * @param {Partial<UpdateContactRequest>} changes - Fields to change.
+   * @returns {Promise<Contact>} The updated contact.
+   */
+  updateContactSafely: async (contactId: number, changes: Partial<UpdateContactRequest>) => {
+    const current = await client.get<Contact>(`/Contact/${contactId}`).then((r) => r.data);
+    return client
+      .put<Contact>(`/Contact/${contactId}`, mergeUpdate(contactToUpdateRequest(current), changes))
+      .then((r) => r.data);
+  },
+
+  /**
    * Archive a contact
-   * @see https://docs.virtuous.org/api-reference/contact/archive-a-contact
+   * @see https://docs.virtuoussoftware.com/#052d1067-9289-4a92-b8c4-f6e436b13f9b
    * @param {number} contactId - Contact id.
    * @param {ArchiveContactParams} params - Archive options.
    * @returns {Promise<void>} Resolved API payload.
@@ -148,7 +174,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Unarchive a contact
-   * @see https://docs.virtuous.org/api-reference/contact/unarchive-a-contact
+   * @see https://docs.virtuoussoftware.com/#4994fefa-2e0c-40be-8b35-1b297a575016
    * @param {number} contactId - Contact id.
    * @returns {Promise<void>} Resolved API payload.
    */
@@ -157,7 +183,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Toggle follow on a contact
-   * @see https://docs.virtuous.org/api-reference/contact/update-whether-the-user-is-following-a-contact
+   * @see https://docs.virtuoussoftware.com/#contact/update-whether-the-user-is-following-a-contact
    * @param {number} contactId - Contact id.
    * @returns {Promise<void>} Resolved API payload.
    */
@@ -167,7 +193,7 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── Contact Query ─────────────────────────────────────────────────────
   /**
    * Query contacts (abbreviated)
-   * @see https://docs.virtuous.org/api-reference/contact/request-contacts-with-a-custom-query
+   * @see https://docs.virtuoussoftware.com/
    * @param {ContactQueryGeolocationRequest} request - Query body.
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
@@ -177,7 +203,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Query contacts (full)
-   * @see https://docs.virtuous.org/api-reference/contact/request-contacts-with-a-custom-query-1
+   * @see https://docs.virtuoussoftware.com/
    * @param {ContactQueryGeolocationRequest} request - Query body.
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactListResponse<Contact>>} Resolved API payload.
@@ -187,7 +213,7 @@ const createContactClient = (client: AxiosInstance) => ({
 
   /**
    * Get contact query options
-   * @see https://docs.virtuous.org/api-reference/contact/request-query-options-to-build-a-query-for-contacts
+   * @see https://docs.virtuoussoftware.com/#8f5e939c-e1e4-481e-a58e-f858d3217b53
    * @returns {Promise<QueryOptionsResponse>} Resolved API payload.
    */
   queryContactOptions: () =>
@@ -196,7 +222,7 @@ const createContactClient = (client: AxiosInstance) => ({
   // ── Receipts ──────────────────────────────────────────────────────────
   /**
    * Get receipts for a contact email
-   * @see https://docs.virtuous.org/api-reference/contact/get-receipts
+   * @see https://docs.virtuoussoftware.com/#cafc4c21-01ea-49cd-8cea-c3d50b0c7584
    * @param {EmailSkipTakeParams} [params] - Email + pagination.
    * @returns {Promise<ReceiptListResponse>} Resolved API payload.
    */
@@ -204,18 +230,129 @@ const createContactClient = (client: AxiosInstance) => ({
     client.get<ReceiptListResponse>('/Contact/Receipts', { params }).then((r) => r.data),
 
   /**
-   * Get receipt PDF
-   * @see https://docs.virtuous.org/api-reference/contact/get-receipt
+   * Returns a receipt file payload (`fileStream`, `filePath`, `contentType`).
+   * @see https://docs.virtuoussoftware.com/#70c4a8ab-65d9-44f7-9465-082182f6e4b9
    * @param {number} receiptId - Receipt id.
-   * @returns {Promise<Blob>} Resolved API payload.
+   * @returns {Promise<ReceiptFileResponse>} Receipt file metadata and stream.
    */
   getReceiptPdfById: (receiptId: number) =>
+    client.get<ReceiptFileResponse>(`/Contact/Receipts/${receiptId}`).then((r) => r.data),
+
+  /**
+   * Returns recent activity on contacts the current user follows.
+   * @see https://docs.virtuoussoftware.com/#8d547c98-fc38-403c-bedd-d73713be1c63
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ListResponse<FollowedContactActivity>>} Followed-contact activity.
+   */
+  getFollowedContactActivity: (params?: SkipTakeParams) =>
     client
-      .get<Blob>(`/Contact/Receipts/${receiptId}`, {
-        responseType: 'blob',
-        headers: { Accept: 'application/pdf' },
-      })
+      .get<ListResponse<FollowedContactActivity>>('/Contact/Activity', { params })
       .then((r) => r.data),
+
+  /**
+   * Returns contacts the current user follows.
+   * @see https://docs.virtuoussoftware.com/#0b0bd866-0c5b-463e-9d2e-f348cc32def0
+   * @param {SkipTakeParams} [params] - Pagination.
+   * @returns {Promise<ContactListResponse<ContactListItem>>} Followed contacts.
+   */
+  getFollowedContacts: (params?: SkipTakeParams) =>
+    client
+      .get<ContactListResponse<ContactListItem>>('/Contact/Following', { params })
+      .then((r) => r.data),
+
+  /**
+   * Returns configured name prefixes and titles.
+   * @see https://docs.virtuoussoftware.com/#fc692434-1f79-4d7d-96bd-71f741eab7e9
+   * @returns {Promise<string[]>} Prefixes and titles.
+   */
+  getContactPrefixes: () => client.get<string[]>('/Contact/Prefixes').then((r) => r.data),
+
+  /**
+   * Returns enabled custom fields for contacts.
+   * @see https://docs.virtuoussoftware.com/#060c7f43-3ff8-40a3-8e29-431cecb27f3e
+   * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+   */
+  getContactCustomFields: () =>
+    client.get<CustomFieldDefinition[]>('/Contact/CustomFields').then((r) => r.data),
+
+  /**
+   * Returns custom collection definitions for contacts.
+   * @see https://docs.virtuoussoftware.com/#a1699247-3c3d-4c8e-8348-b97f9134697b
+   * @returns {Promise<CustomCollectionDefinition[]>} Collection definitions.
+   */
+  listContactCustomCollections: () =>
+    client.get<CustomCollectionDefinition[]>('/Contact/CustomCollections').then((r) => r.data),
+
+  /**
+   * Adds a custom collection instance to a contact.
+   * @see https://docs.virtuoussoftware.com/#028b8b0d-62ae-4427-8b41-7edfe207aa0f
+   * @param {number} contactId - Contact id.
+   * @param {number} customCollectionId - Collection definition id.
+   * @param {CreateCustomCollectionInstanceRequest} request - Field values.
+   * @returns {Promise<CustomCollectionInstance>} The created instance.
+   */
+  createContactCollection: (
+    contactId: number,
+    customCollectionId: number,
+    request: CreateCustomCollectionInstanceRequest,
+  ) =>
+    client
+      .post<CustomCollectionInstance>(`/Contact/${contactId}/Collection/${customCollectionId}`, request)
+      .then((r) => r.data),
+
+  /**
+   * Replaces a custom collection instance on a contact.
+   * @see https://docs.virtuoussoftware.com/#2ee0875f-ab44-417a-88d5-7ae7e400cd45
+   * @param {number} contactId - Contact id.
+   * @param {number} collectionInstanceId - Instance id.
+   * @param {CreateCustomCollectionInstanceRequest} request - Field values.
+   * @returns {Promise<CustomCollectionInstance>} The updated instance.
+   */
+  updateContactCollection: (
+    contactId: number,
+    collectionInstanceId: number,
+    request: CreateCustomCollectionInstanceRequest,
+  ) =>
+    client
+      .put<CustomCollectionInstance>(
+        `/Contact/${contactId}/Collection/${collectionInstanceId}`,
+        request,
+      )
+      .then((r) => r.data),
+
+  /**
+   * Deletes a custom collection instance from a contact.
+   * @see https://docs.virtuoussoftware.com/#04ce7d36-130b-46b8-aa98-b19101a012fb
+   * @param {number} contactId - Contact id.
+   * @param {number} collectionInstanceId - Instance id.
+   * @returns {Promise<void>} Resolves when deleted.
+   */
+  deleteContactCollection: (contactId: number, collectionInstanceId: number) =>
+    client
+      .delete<void>(`/Contact/${contactId}/Collection/${collectionInstanceId}`)
+      .then(() => undefined),
+
+  /**
+   * Submits a contact through the import process (preferred over createContact).
+   * @see https://docs.virtuoussoftware.com/#0b27a920-243c-4f02-a5c3-6e522b926431
+   * @param {CreateContactTransactionRequest} request - Import contact body.
+   * @returns {Promise<QueuedImportResponse>} Queued-import acknowledgement.
+   */
+  createContactTransaction: (request: CreateContactTransactionRequest) =>
+    client
+      .post<QueuedImportResponse>('/Contact/Transaction', request)
+      .then((r) => (r.data ?? {}) as QueuedImportResponse),
+
+  /**
+   * Submits a batch of contacts through the import process.
+   * @see https://docs.virtuoussoftware.com/#fe6c2bdd-e65a-4e7c-b503-9ede0b7ea9f7
+   * @param {CreateContactImportRequest} request - Batch import body.
+   * @returns {Promise<QueuedImportResponse>} Queued-import acknowledgement.
+   */
+  createContactImport: (request: CreateContactImportRequest) =>
+    client
+      .post<QueuedImportResponse>('/Contact/Batch', request)
+      .then((r) => (r.data ?? {}) as QueuedImportResponse),
 });
 
 export default createContactClient;

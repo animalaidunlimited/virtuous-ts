@@ -12,12 +12,15 @@ export interface ContactNoteReminder {
   description?: string;
   isPastDue?: boolean;
   isUnresolved?: boolean;
-  [key: string]: unknown;
+  contactAvatarUrl?: string;
+  reminderTypeDisplayName?: string;
+  taskStatusDisplayName?: string;
+  completeUrl?: string;
 }
 
 /**
  * Contact note returned by Virtuous CRM.
- * @see https://docs.virtuous.org/api-reference/contact-note/gets-the-specified-note
+ * @see https://docs.virtuoussoftware.com/#e267ff27-b827-486e-8ef1-8b80bfc480c4
  */
 export interface ContactNote {
   id: number;

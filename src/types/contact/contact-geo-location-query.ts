@@ -1,4 +1,3 @@
-
 import type { ContactListItem } from './contact';
 import type { QueryGroup } from '../shared/query';
 
@@ -17,7 +16,6 @@ import type { QueryGroup } from '../shared/query';
     groups: QueryGroup[];
     sortBy?: string;
     descending?: boolean;
-
   }
   
   export interface ContactQueryGeolocationResponse {

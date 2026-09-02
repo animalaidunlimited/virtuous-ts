@@ -6,7 +6,7 @@ export interface ProjectGiftSpecification {
 
 /**
  * Virtuous CRM Project — `GET /api/Project/Code/{projectCode}` and create response.
- * @see https://docs.virtuous.org/api-reference/project/get-project-by-code
+ * @see https://docs.virtuoussoftware.com/
  */
 export interface Project {
   id?: number;

@@ -2,7 +2,7 @@ import type { SkipTakeParams } from '../shared/skip-take-params';
 
 /**
  * An existing Virtuous email list (`POST /EmailList/Search`).
- * Lists are created in the CRM UI; the API cannot create a list from scratch.
+ * List definitions are created in the CRM UI.
  * @see https://docs.virtuoussoftware.com/#f750634b-e2be-4d49-a472-3e92f51fc382
  */
 export interface EmailList {

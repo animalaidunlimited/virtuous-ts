@@ -17,6 +17,15 @@ import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { GiftListSkipTakeParams, SkipTakeParams } from '../types/shared/skip-take-params';
 import { CreateGiftRequest } from '../types/gift/gift-create';
 import { convertGiftToUpdateGiftRequest } from '../utils/convert-gift-to-update-request';
+import type { QueuedImportResponse } from '../types/shared/queued-import';
+import type { CustomFieldDefinition } from '../types/shared/custom-field-definition';
+import type {
+  BulkGiftPatch,
+  CreateGiftTransactionsRequest,
+  CreateReversingTransactionRequest,
+  GiftDesignationQueryRow,
+} from '../types/gift/gift-bulk';
+import type { ListResponse } from '../types/shared/list-response';
 
 
 
@@ -43,7 +52,7 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Basic Gift Operations ─────────────────────────────────────────────
     /**
      * Get a gift by ID
-     * @see https://docs.virtuous.org/api-reference/gift/get-a-gift-by-the-identifier
+     * @see https://docs.virtuoussoftware.com/#1c36793d-84b9-4599-951e-fe8b281f80a2
      *
      * @param {number} id - Virtuous gift id.
      * @returns {Promise<Gift>} The gift record.
@@ -54,7 +63,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get gifts for a contact
-     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-with-the-specified-contact-identifier
+     * @see https://docs.virtuoussoftware.com/
      *
      * @param {number} contactId - Virtuous contact id.
      * @param {GiftListSkipTakeParams} [params] - Skip/take pagination.
@@ -68,8 +77,8 @@ const createGiftClient = (client: AxiosInstance) => {
         .then((r) => r.data),
 
     /**
-     * Get gifts for a contact by reference ID
-     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-by-a-contact-reference-identifier
+     * Returns gifts for a contact reference id. HMAC authentication only; API keys may receive 403.
+     * @see https://docs.virtuoussoftware.com/
      *
      * @param {string} referenceId - Contact reference id.
      * @param {GiftsForContactByReferenceIdSkipTakeParams} [params] - Skip/take pagination.
@@ -87,7 +96,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get passthrough gifts for a contact
-     * @see https://docs.virtuous.org/api-reference/gift/get-passthrough-gifts-with-the-specified-contact-identifier
+     * @see https://docs.virtuoussoftware.com/
      *
      * @param {number} contactId - Virtuous contact id.
      * @param {GiftListSkipTakeParams} [params] - Skip/take pagination.
@@ -102,7 +111,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Get a gift by transaction source and ID
-     * @see https://docs.virtuous.org/api-reference/gift/get-a-gift-by-the-transaction-source-and-identifier
+     * @see https://docs.virtuoussoftware.com/#08d16b40-0c34-43c6-a9a9-a4b7c3d7d453
      *
      * @param {string} transactionSource - Transaction source name.
      * @param {string} transactionId - Transaction id within that source.
@@ -116,7 +125,7 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Update & Delete ───────────────────────────────────────────────────
     /**
      * Update a gift
-     * @see https://docs.virtuous.org/api-reference/gift/update-a-gift-with-the-specified-identifier
+     * @see https://docs.virtuoussoftware.com/#b094fc10-fdec-4085-a178-354dece28423
      *
      * Not recommended to use this method directly. Use updateGiftSafely() instead.
      *
@@ -167,7 +176,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Delete a gift
-     * @see https://docs.virtuous.org/api-reference/gift/delete-a-gift-with-the-specified-identifier
+     * @see https://docs.virtuoussoftware.com/#64fc1392-e1ed-4ccd-a00b-8f66dc0e0de1
      *
      * @param {number} id - Virtuous gift id.
      * @returns {Promise<void>} Resolves when the gift is deleted.
@@ -178,14 +187,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     // ── Create Gift (preferred method) ────────────────────────────────────
     /**
-     * Create a gift using Virtuous's "preferred" transaction method
-     * @see https://docs.virtuous.org/api-reference/gift/create-a-gift-transaction
-     *
-     * This is the recommended way to create gifts — it supports smart contact matching,
-     * reference IDs, custom fields, and all gift types.
+     * Queues a gift through the import process (recommended). Matching runs later; the response is not a Gift record.
+     * @see https://docs.virtuoussoftware.com/#e4a6a1e3-71a4-44f9-bd7c-9466996befac
      *
      * @param {CreateGiftTransactionRequest} request - v2 transaction create body.
-     * @returns {Promise<Gift>} The created gift.
+     * @returns {Promise<QueuedImportResponse>} Empty queued-import acknowledgement.
      * @example
      * await virtuous.gift.createGiftTransaction({
      *   transactionSource: "Face to Face 012025",
@@ -201,11 +207,14 @@ const createGiftClient = (client: AxiosInstance) => {
      *   mediaOutlet: "Facebook",
      * });
      */
-    createGiftTransaction: (request: CreateGiftTransactionRequest) => client.post<Gift>('/v2/Gift/Transaction', request).then((r) => r.data),
+    createGiftTransaction: (request: CreateGiftTransactionRequest) =>
+      client
+        .post<QueuedImportResponse>('/v2/Gift/Transaction', request)
+        .then((r) => (r.data ?? {}) as QueuedImportResponse),
 
     /**
      * Create a gift (legacy `POST /Gift` — prefer {@link createGiftTransaction})
-     * @see https://docs.virtuous.org/api-reference/gift/create-gift-not-recommended
+     * @see https://docs.virtuoussoftware.com/#b4c773db-88d0-4f07-ad06-d8ca32cbc236
      *
      * @param {CreateGiftRequest} request - Legacy create body (prefer createGiftTransaction).
      * @returns {Promise<Gift>} The created gift.
@@ -226,7 +235,7 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Reference Data ────────────────────────────────────────────────────
     /**
      * Get non-cash gift types
-     * @see https://docs.virtuous.org/api-reference/gift/get-non-cash-gift-types-available
+     * @see https://docs.virtuoussoftware.com/
      *
      * @param {GiftListSkipTakeParams} params - Skip/take pagination.
      * @returns {Promise<GiftListResponse<NonCashGiftTypes>>} Non-cash gift type catalog.
@@ -241,7 +250,7 @@ const createGiftClient = (client: AxiosInstance) => {
     // ── Advanced Query ────────────────────────────────────────────────────
     /**
      * Get gift query options
-     * @see https://docs.virtuous.org/api-reference/gift/get-gift-query-options
+     * @see https://docs.virtuoussoftware.com/#a9cb583f-aa5b-41bc-907d-e442a923dad3
      *
      * @returns {Promise<QueryOptionsResponse>} Query builder metadata.
      * @example
@@ -251,7 +260,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Search gifts and return a list of gifts with abbreviated details
-     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-matching-the-query-criteria-provided
+     * @see https://docs.virtuoussoftware.com/#af19412c-7a8e-484f-9966-cc7e27b26b69
      *
      * @param {QueryRequest} request - Virtuous query payload.
      * @param {SkipTakeParams} [params] - Skip/take pagination.
@@ -269,7 +278,7 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Search gifts and return a list of gifts with full details
-     * @see https://docs.virtuous.org/api-reference/gift/get-gifts-matching-the-query-criteria-provided-with-all-gift-info
+     * @see https://docs.virtuoussoftware.com/
      *
      * @param {QueryRequest} request - Virtuous query payload.
      * @param {SkipTakeParams} [params] - Skip/take pagination.
@@ -304,6 +313,63 @@ const createGiftClient = (client: AxiosInstance) => {
      * await virtuous.gift.updateGift(12345, { ...base, amount: 500 });
      */
     convertGiftToUpdateGiftRequest,
+
+    /**
+     * Submits a batch of gift transactions through the import process.
+     * @see https://docs.virtuoussoftware.com/#784d2096-10db-42be-83e5-83632936032f
+     * @param {CreateGiftTransactionsRequest} request - Batch transaction source and items.
+     * @returns {Promise<QueuedImportResponse>} Queued-import acknowledgement.
+     */
+    createGiftTransactions: (request: CreateGiftTransactionsRequest) =>
+      client
+        .post<QueuedImportResponse>('/v2/Gift/Transactions', request)
+        .then((r) => (r.data ?? {}) as QueuedImportResponse),
+
+    /**
+     * Creates a reversing transaction that negates the specified gift.
+     * @see https://docs.virtuoussoftware.com/#97c562eb-c771-4495-9469-487cc0ed1420
+     * @param {CreateReversingTransactionRequest} request - Reversed gift id and date.
+     * @returns {Promise<Gift>} The reversing gift.
+     */
+    createReversingTransaction: (request: CreateReversingTransactionRequest) =>
+      client.post<Gift>('/Gift/ReversingTransaction', request).then((r) => r.data),
+
+    /**
+     * Bulk-patches gifts. Send only fields being changed, including each gift `id`.
+     * @see https://docs.virtuoussoftware.com/#d34fe045-7d1d-4929-86f0-dd321ebb960d
+     * @param {BulkGiftPatch[]} request - Partial gift patches.
+     * @returns {Promise<unknown>} Bulk update result.
+     */
+    bulkUpdateGifts: (request: BulkGiftPatch[]) =>
+      client.patch<unknown>('/Gift', request).then((r) => r.data),
+
+    /**
+     * Returns enabled custom fields for gifts.
+     * @see https://docs.virtuoussoftware.com/#de71d723-902b-4357-af1c-20e35518aa74
+     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+     */
+    getGiftCustomFields: () =>
+      client.get<CustomFieldDefinition[]>('/Gift/CustomFields').then((r) => r.data),
+
+    /**
+     * Returns query fields and operators for gift designations.
+     * @see https://docs.virtuoussoftware.com/#fb900551-850c-432f-a986-17a3c6b5969f
+     * @returns {Promise<QueryOptionsResponse>} Query builder metadata.
+     */
+    getGiftDesignationQueryOptions: () =>
+      client.get<QueryOptionsResponse>('/GiftDesignation/QueryOptions').then((r) => r.data),
+
+    /**
+     * Queries gifts broken out by designation. Max take is 1,000.
+     * @see https://docs.virtuoussoftware.com/#1147aa16-24e0-46d4-ae98-24731b90a93b
+     * @param {QueryRequest} request - Query body.
+     * @param {SkipTakeParams} [params] - Pagination.
+     * @returns {Promise<ListResponse<GiftDesignationQueryRow>>} Designation rows.
+     */
+    queryGiftDesignations: (request: QueryRequest, params?: SkipTakeParams) =>
+      client
+        .post<ListResponse<GiftDesignationQueryRow>>('/GiftDesignation/Query', request, { params })
+        .then((r) => r.data),
   };
 };
 

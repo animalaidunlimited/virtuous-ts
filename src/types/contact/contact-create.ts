@@ -1,5 +1,4 @@
 
-
 import { ContactMethodType } from "../shared/contact-method-type";
 
 export interface ContactAddressCreateRequest {

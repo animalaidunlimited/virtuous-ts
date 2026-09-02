@@ -1,7 +1,7 @@
 /**
  * Input for creating a contact note.
  * `isPrivate` maps to the JSON field `private` on POST /api/ContactNote.
- * @see https://docs.virtuous.org/api-reference/contact-note/creates-a-new-note-for-the-specified-contact
+ * @see https://docs.virtuoussoftware.com/
  */
 export interface CreateContactNoteInput {
   contactId: number;
@@ -40,7 +40,7 @@ export function toCreateContactNoteWireBody(
 
 /**
  * Defaults for general contact notes (e.g. e-commerce order notes).
- * @see https://docs.virtuous.org/api-reference/contact-note/creates-a-new-note-for-the-specified-contact
+ * @see https://docs.virtuoussoftware.com/
  * @param {object} input - `contactId`, `note`, `noteDateTime`, optional `type`.
  * @returns {CreateContactNoteInput} Input for {@link VirtuousClient.contactNote.createContactNote}.
  * @example

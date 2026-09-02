@@ -24,6 +24,24 @@ export const toVirtuousMMDDYYYY = (date: string): string => {
   return `${m}/${d}/${y}`;  
 };
 
+const MM_DD_YYYY = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+
+/** Accepts YYYY-MM-DD or M/D/YYYY and returns Virtuous M/D/YYYY. */
+const normalizeQueryDate = (date: string, parameter: string, bound: 'from' | 'to'): string => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return toVirtuousMMDDYYYY(date);
+  }
+  try {
+    zod.string().regex(MM_DD_YYYY).parse(date);
+  } catch (error) {
+    if (error instanceof zod.ZodError) {
+      throw new Error(`Invalid ${bound} date for ${parameter}: ${date} -- ` + error.issues);
+    }
+    throw error;
+  }
+  return date;
+};
+
 /**
  * Add date range conditions (GreaterThanOrEqual + LessThanOrEqual)
  * Handles DateFrom, DateTo, and DateYear patterns
@@ -63,29 +81,11 @@ export const addDateRangeConditions = (
     toDate = `12/31/${yearStr}`;
   } else {
     if (from) {
-      const schema = zod.string().regex(/^\d{2}\/\d{2}\/\d{4}$/);
-      try {
-        schema.parse(from);
-      } catch (error) {
-        if (error instanceof zod.ZodError) {
-          throw new Error(`Invalid from date for ${parameter}: ${from} -- ` + error.issues);
-        }
-        throw error;
-      }
-      fromDate = from;
+      fromDate = normalizeQueryDate(from, parameter, 'from');
     }
     if (to) {
-      const schema = zod.string().regex(/^\d{2}\/\d{2}\/\d{4}$/);
-      try {
-        schema.parse(to);
-      } catch (error) {
-        if (error instanceof zod.ZodError) {
-          throw new Error(`Invalid to date for ${parameter}: ${to} -- ` + error.issues);
-        }
-        throw error;
-      }
-      toDate = to;
-      }
+      toDate = normalizeQueryDate(to, parameter, 'to');
+    }
     }
   
 

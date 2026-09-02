@@ -16,7 +16,7 @@ export interface SimpleRecurringGiftFilters {
   createdDateFrom?: string;
   createdDateTo?: string;
   createdDateYear?: string | number;
-  reccurringGiftDateYear?: string | number;
+  recurringGiftDateYear?: string | number;
   recurringGiftDateFrom?: string;
   recurringGiftDateTo?: string;
   startDateFrom?: string;
@@ -79,13 +79,13 @@ const buildRecurringGiftQuery = (filters: SimpleRecurringGiftFilters): QueryRequ
   }
 
   // ── RECURRING GIFT DATE ─────────────────────────────────────────────────────────
-  if (filters.recurringGiftDateFrom || filters.recurringGiftDateTo || filters.reccurringGiftDateYear) {
+  if (filters.recurringGiftDateFrom || filters.recurringGiftDateTo || filters.recurringGiftDateYear) {
   addDateRangeConditions(
     conditions,
     'Recurring Gift Date',
     filters.recurringGiftDateFrom,
       filters.recurringGiftDateTo,
-      filters.reccurringGiftDateYear,
+      filters.recurringGiftDateYear,
     );
   }
 
@@ -210,8 +210,8 @@ const buildRecurringGiftQuery = (filters: SimpleRecurringGiftFilters): QueryRequ
 
   return {
     groups: conditions.length ? [{ conditions }] : [],
-    SortBy: filters.sortBy,
-    Descending: filters.descending,
+    sortBy: filters.sortBy,
+    descending: filters.descending,
   };
 };
 

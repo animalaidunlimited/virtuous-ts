@@ -12,7 +12,7 @@ import type {
  * Virtuous CRM Email List API.
  *
  * Search existing lists, bulk-queue individuals onto lists, and list memberships
- * for an individual. There is no API to create an email list from scratch.
+ * for an individual. List definitions are created in the CRM UI.
  *
  * @see https://docs.virtuoussoftware.com/#afe46206-15b4-4f20-914e-1cae07d83246
  */
