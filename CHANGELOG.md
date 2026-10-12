@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0
+
+Opt-in resilience for the org-wide 5,000 requests/hour limit, transient errors, and silent query mistakes. `{ baseURL, apiKey }` behaves as in 1.0.1: no retries, no reserve guard, no query validation.
+
+### Added
+
+- Passive rate-limit tracking from `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` (epoch seconds or HTTP date), including error responses. `getRateLimitStatus()` reads the snapshot and does not send a request.
+- Opt-in `rateLimitReserve`. When remaining quota is known and at or below the reserve, the next request is rejected with `VirtuousRateLimitError` before it is sent.
+- Opt-in retry. `retry: {}` or `retry: true` uses 3 retries, 500ms base, 30s cap, and statuses 429, 502, 503, 504. Honours `Retry-After`, otherwise full-jitter backoff. Retries GET/HEAD and read POSTs (`/Query`, `/Search`, `/Proximity`) only, unless `retryNonIdempotent` is true. `VirtuousApiError.attempts` counts sends.
+- `queryAll`, `listAll`, and convenience methods `queryAllGifts`, `queryAllContacts`, `queryAllCampaigns`, plus `contactTag.listAllTagsFully()`.
+- `validateQuery` and `VirtuousQueryValidationError`. `validateQueries: true` checks gift, contact, campaign, project, recurring gift, planned gift, contact note, and gift designation queries before POST. QueryOptions are cached for one hour.
+- `readOnly: true` promotes the test allowlist into the client. The live suite still uses the re-exported guard.
+- `DEFAULT_BASE_URL`. `baseURL` stays required.
+- `docs/list-audit.md` lists skip/take methods and plain-array catalogs that default to 10 rows.
+
 ## 1.0.1
 
 Dependency and toolchain updates. No public API changes.

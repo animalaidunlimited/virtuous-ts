@@ -50,13 +50,23 @@ export class VirtuousApiError extends Error {
   public readonly data?: any;
   public readonly validationErrors?: Record<string, string[]>;
   public readonly cause?: AxiosError<VirtuousApiErrorResponse>;
+  /**
+   * How many times the request was sent, including the first try.
+   * Stays 1 when retry is off. Set by the error-wrapping interceptor.
+   */
+  public readonly attempts: number;
 
-  constructor(message: string, axiosError: AxiosError<VirtuousApiErrorResponse>) {
+  constructor(
+    message: string,
+    axiosError: AxiosError<VirtuousApiErrorResponse>,
+    attempts = 1,
+  ) {
     super(message, { cause: axiosError });
 
     this.name = 'VirtuousApiError';
     this.status = axiosError.response?.status;
     this.cause = axiosError;
+    this.attempts = attempts;
 
     const data = axiosError.response?.data;
     if (data) {

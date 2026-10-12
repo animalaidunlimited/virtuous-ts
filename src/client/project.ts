@@ -25,6 +25,8 @@ import type { ListResponse } from '../types/shared/list-response';
 import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { QueryRequest } from '../types/shared/query';
 import type { SkipTakeParams } from '../types/shared/skip-take-params';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 import {
   mergeUpdate,
   projectExpenseToUpdateRequest,
@@ -37,7 +39,10 @@ import type { SearchRequest } from '../types/shared/search-request';
  * Virtuous CRM Project API.
  * @see https://docs.virtuoussoftware.com/#242b03c9-23db-459e-a02d-8b54987282f5
  */
-const createProjectClient = (client: AxiosInstance) => ({
+const createProjectClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => ({
   /**
    * Returns a project by unique project code.
    * @see https://docs.virtuoussoftware.com/#242b03c9-23db-459e-a02d-8b54987282f5
@@ -138,6 +143,9 @@ const createProjectClient = (client: AxiosInstance) => ({
    * @see https://docs.virtuoussoftware.com/#e65cd70e-d1d1-41c9-8030-3d594a662ee7
    * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
    */
+  /**
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10 definitions.
+   */
   getProjectCustomFields: () =>
     client.get<CustomFieldDefinition[]>('/Project/CustomFields').then((r) => r.data),
 
@@ -145,6 +153,9 @@ const createProjectClient = (client: AxiosInstance) => ({
    * Returns configured project types.
    * @see https://docs.virtuoussoftware.com/#dad7c509-c57f-404f-97dc-f0ccc786d8c3
    * @returns {Promise<string[]>} Project types.
+   */
+  /**
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10 types.
    */
   listProjectTypes: () => client.get<string[]>('/Project/Types').then((r) => r.data),
 
@@ -163,8 +174,12 @@ const createProjectClient = (client: AxiosInstance) => ({
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ListResponse<Project>>} Matching projects.
    */
-  queryProjects: (request: QueryRequest, params?: SkipTakeParams) =>
-    client.post<ListResponse<Project>>('/Project/Query', request, { params }).then((r) => r.data),
+  queryProjects: async (request: QueryRequest, params?: SkipTakeParams) => {
+    if (options.validateQueries && options.queryOptionsCache) {
+      await validateQueryWithCache(client, options.queryOptionsCache, '/Project/QueryOptions', request);
+    }
+    return client.post<ListResponse<Project>>('/Project/Query', request, { params }).then((r) => r.data);
+  },
 
   /**
    * Returns expenses for a project. Identify the project with `projectId` or `projectCode`.

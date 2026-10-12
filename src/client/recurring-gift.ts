@@ -9,6 +9,8 @@ import { QueryOptionsResponse } from '../types/shared/query-options';
 import { QueryRequest } from '../types/shared/query';
 import { RecurringGiftPaymentListResponse } from '../types/recurring-gift/recurring-gift-payment';
 import { convertRecurringGiftToUpdateRequest } from '../utils/convert-recurring-gift-to-update-request';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 
 /**
@@ -33,7 +35,10 @@ import { convertRecurringGiftToUpdateRequest } from '../utils/convert-recurring-
  * @example
  * const recurringGift = await virtuous.recurringGift.getRecurringGiftById(12345);
  */
-const createRecurringGiftClient = (client: AxiosInstance) => {
+const createRecurringGiftClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => {
   return {
 
 
@@ -115,9 +120,13 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
       client.put<RecurringGift>(`/RecurringGift/Cancel/${recurringGiftId}`, request).then((r) => r.data),
 
     /**
-     * Get recurring gift custom fields
+     * Get recurring gift custom fields.
+     *
+     * Plain array or short catalog, no `skip`/`take`. Virtuous may return only
+     * the first 10 definitions.
+     *
      * @see https://docs.virtuoussoftware.com/#269c5843-7478-43a2-a04a-1588bb4bafad
-     * @returns {Promise<RecurringGiftCustomFieldListResponse>} Resolved API payload.
+     * @returns {Promise<RecurringGiftCustomFieldListResponse>} Resolved API payload. May be truncated at 10.
      */
     getRecurringGiftCustomFields: () => client.get<RecurringGiftCustomFieldListResponse>(`/RecurringGift/CustomFields`).then((r) => r.data),
 
@@ -129,8 +138,12 @@ const createRecurringGiftClient = (client: AxiosInstance) => {
      * @param {SkipTakeParams} [params] - Pagination.
      * @returns {Promise<RecurringGiftListResponse>} Resolved API payload.
      */
-    queryRecurringGifts: (request: QueryRequest, params?: SkipTakeParams) =>
-      client.post<RecurringGiftListResponse>('/RecurringGift/Query', request, { params }).then((r) => r.data),
+    queryRecurringGifts: async (request: QueryRequest, params?: SkipTakeParams) => {
+      if (options.validateQueries && options.queryOptionsCache) {
+        await validateQueryWithCache(client, options.queryOptionsCache, '/RecurringGift/QueryOptions', request);
+      }
+      return client.post<RecurringGiftListResponse>('/RecurringGift/Query', request, { params }).then((r) => r.data);
+    },
 
     /**
      * Get recurring gift query options

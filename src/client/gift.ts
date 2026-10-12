@@ -26,6 +26,9 @@ import type {
   GiftDesignationQueryRow,
 } from '../types/gift/gift-bulk';
 import type { ListResponse } from '../types/shared/list-response';
+import { queryAll, type QueryAllOptions, type QueryAllResult } from '../utils/query-all';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 
 
@@ -47,8 +50,18 @@ import type { ListResponse } from '../types/shared/list-response';
  * @example
  * await virtuous.gift.updateGiftSafely(12345, { amount: 500 });
  */
-const createGiftClient = (client: AxiosInstance) => {
-  return {
+const createGiftClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => {
+  const checkQuery = async (optionsPath: string, request: QueryRequest): Promise<void> => {
+    if (!options.validateQueries || !options.queryOptionsCache) {
+      return;
+    }
+    await validateQueryWithCache(client, options.queryOptionsCache, optionsPath, request);
+  };
+
+  const gift = {
     // ── Basic Gift Operations ─────────────────────────────────────────────
     /**
      * Get a gift by ID
@@ -213,7 +226,7 @@ const createGiftClient = (client: AxiosInstance) => {
         .then((r) => (r.data ?? {}) as QueuedImportResponse),
 
     /**
-     * Create a gift (legacy `POST /Gift` — prefer {@link createGiftTransaction})
+     * Create a gift (legacy `POST /Gift`. Prefer {@link createGiftTransaction})
      * @see https://docs.virtuoussoftware.com/#b4c773db-88d0-4f07-ad06-d8ca32cbc236
      *
      * @param {CreateGiftRequest} request - Legacy create body (prefer createGiftTransaction).
@@ -234,7 +247,8 @@ const createGiftClient = (client: AxiosInstance) => {
 
     // ── Reference Data ────────────────────────────────────────────────────
     /**
-     * Get non-cash gift types
+     * Get non-cash gift types.
+     * Accepts `skip`/`take`. Omitting `take` uses Virtuous's 10-row default.
      * @see https://docs.virtuoussoftware.com/
      *
      * @param {GiftListSkipTakeParams} params - Skip/take pagination.
@@ -273,8 +287,24 @@ const createGiftClient = (client: AxiosInstance) => {
      *   buildGiftQuery({ amountMin: 10000, giftDateYear: 2025 })
      * );
      */
-    queryGiftsWithAbbreviatedDetails: (request: QueryRequest, params?: SkipTakeParams) =>
-      client.post<GiftQueryResponse>('/Gift/Query', request, { params }).then((r) => r.data),
+    queryGiftsWithAbbreviatedDetails: async (request: QueryRequest, params?: SkipTakeParams) => {
+      await checkQuery('/Gift/QueryOptions', request);
+      return client.post<GiftQueryResponse>('/Gift/Query', request, { params }).then((r) => r.data);
+    },
+
+    /**
+     * Pages `queryGiftsWithAbbreviatedDetails` until the list ends or the cap is hit.
+     * Default page size is 1,000. Default cap is 10,000 rows (`truncated: true` if hit).
+     *
+     * @param request - Virtuous query payload.
+     * @param opts - Page size, cap, progress callback, abort signal.
+     * @returns Concatenated abbreviated gifts.
+     */
+    queryAllGifts: (
+      request: QueryRequest,
+      opts?: QueryAllOptions,
+    ): Promise<QueryAllResult<GiftSummaryWithDesignations>> =>
+      queryAll((params) => gift.queryGiftsWithAbbreviatedDetails(request, params), opts),
 
     /**
      * Search gifts and return a list of gifts with full details
@@ -291,7 +321,8 @@ const createGiftClient = (client: AxiosInstance) => {
      *   buildGiftQuery({ amountMin: 10000, giftDateYear: 2025 })
      * );
      */
-    queryGiftsWithFullDetails: (request: QueryRequest, params?: SkipTakeParams) => {
+    queryGiftsWithFullDetails: async (request: QueryRequest, params?: SkipTakeParams) => {
+      await checkQuery('/Gift/QueryOptions', request);
       return client.post<GiftListResponse<Gift>>('/Gift/Query/FullGift', request, { params }).then((r) => r.data);
     },
 
@@ -345,8 +376,11 @@ const createGiftClient = (client: AxiosInstance) => {
 
     /**
      * Returns enabled custom fields for gifts.
+     *
+     * Plain array, no `skip`/`take`. Virtuous may return only the first 10 definitions.
+     *
      * @see https://docs.virtuoussoftware.com/#de71d723-902b-4357-af1c-20e35518aa74
-     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog. May be truncated at 10.
      */
     getGiftCustomFields: () =>
       client.get<CustomFieldDefinition[]>('/Gift/CustomFields').then((r) => r.data),
@@ -366,11 +400,15 @@ const createGiftClient = (client: AxiosInstance) => {
      * @param {SkipTakeParams} [params] - Pagination.
      * @returns {Promise<ListResponse<GiftDesignationQueryRow>>} Designation rows.
      */
-    queryGiftDesignations: (request: QueryRequest, params?: SkipTakeParams) =>
-      client
+    queryGiftDesignations: async (request: QueryRequest, params?: SkipTakeParams) => {
+      await checkQuery('/GiftDesignation/QueryOptions', request);
+      return client
         .post<ListResponse<GiftDesignationQueryRow>>('/GiftDesignation/Query', request, { params })
-        .then((r) => r.data),
+        .then((r) => r.data);
+    },
   };
+
+  return gift;
 };
 
 export default createGiftClient;

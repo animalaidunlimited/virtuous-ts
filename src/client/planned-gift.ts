@@ -7,6 +7,8 @@ import { GiftsAppliedToPlannedGiftResponse } from '../types/planned-gift/planned
 import { QueryOptionsResponse } from '../types/shared/query-options';
 import { QueryRequest } from '../types/shared/query';
 import type { CustomFieldDefinition } from '../types/shared/custom-field-definition';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 /**
  * Planned Gift API client
@@ -25,7 +27,10 @@ import type { CustomFieldDefinition } from '../types/shared/custom-field-definit
  * @example
  * await virtuous.plannedGift.updatePlannedGiftSafely(1, { anticipatedAmount: 500 });
  */
-const createPlannedGiftClient = (client: AxiosInstance) => {
+const createPlannedGiftClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => {
   const convertPlannedGiftToUpdateRequest = (plannedGift: PlannedGift): UpdatePlannedGiftRequest => {
     const {
       id: _id,
@@ -190,15 +195,22 @@ const createPlannedGiftClient = (client: AxiosInstance) => {
      * const query = buildPlannedGiftQuery({ anticipatedAmount: 100 });
      * await virtuous.plannedGift.queryPlannedGifts(query, { skip: 0, take: 10 });
      */
-    queryPlannedGifts: (request: QueryRequest, params?: SkipTakeParams): Promise<PlannedGiftListResponse> =>
-      client.post<PlannedGiftListResponse>('/PlannedGift/Query', request, { params }).then((r) => r.data),
+    queryPlannedGifts: async (request: QueryRequest, params?: SkipTakeParams): Promise<PlannedGiftListResponse> => {
+      if (options.validateQueries && options.queryOptionsCache) {
+        await validateQueryWithCache(client, options.queryOptionsCache, '/PlannedGift/QueryOptions', request);
+      }
+      return client.post<PlannedGiftListResponse>('/PlannedGift/Query', request, { params }).then((r) => r.data);
+    },
 
     convertPlannedGiftToUpdateRequest,
 
     /**
      * Returns enabled custom fields for planned gifts.
+     *
+     * Plain array, no `skip`/`take`. Virtuous may return only the first 10 definitions.
+     *
      * @see https://docs.virtuoussoftware.com/#ae63530d-f44e-43a3-b014-3d5887381723
-     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+     * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog. May be truncated at 10.
      */
     getPlannedGiftCustomFields: () =>
       client.get<CustomFieldDefinition[]>('/PlannedGift/CustomFields').then((r) => r.data),
