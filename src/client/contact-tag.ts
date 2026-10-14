@@ -4,9 +4,11 @@ import type {
   ContactTag,
   ContactTagListResponse,
   CreateContactTagRequest,
+  Tag,
   TagListResponse,
   TagSearchBody,
 } from '../types/contact-tag/contact-tag';
+import { listAll, type ListAllOptions, type ListAllResult } from '../utils/list-all';
 
 /**
  * Virtuous CRM Tag and Contact Tag API.
@@ -28,6 +30,16 @@ const createContactTagClient = (client: AxiosInstance) => ({
    */
   listAllTags: (params?: SkipTakeParams) =>
     client.get<TagListResponse>('/Tag', { params }).then((r) => r.data),
+
+  /**
+   * Pages `GET /Tag` until the catalog ends or the cap is hit.
+   * Omitting `take` on `listAllTags` returns Virtuous's 10-row default.
+   *
+   * @param opts - Page size (default 500) and cap (default 5,000).
+   * @returns Every catalog tag the cap allows.
+   */
+  listAllTagsFully: (opts?: ListAllOptions): Promise<ListAllResult<Tag>> =>
+    listAll((params) => client.get<TagListResponse>('/Tag', { params }).then((r) => r.data), opts),
 
   /**
    * Search tags whose name matches fully or partially (`POST /Tag/Search`).

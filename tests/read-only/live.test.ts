@@ -80,7 +80,7 @@ beforeAll(() => {
     apiKey,
     timeout: 30_000,
   });
-  ({ getCallCount } = attachReadOnlyGuard(axiosInstanceFromClient(client)));
+  ({ getCallCount } = attachReadOnlyGuard(axiosInstanceFromClient(client), { enforceCallCap: true }));
 });
 
 afterAll(() => {
@@ -97,6 +97,19 @@ describe('catalog reads', () => {
     const org = await callOrSkip(ctx, () => client.account.getCurrentOrganization());
     expect(typeof org.organizationUserId).toBe('number');
     expect(typeof org.organizationName).toBe('string');
+  });
+
+  it('populates getRateLimitStatus after a GET', async (ctx) => {
+    await callOrSkip(ctx, () => client.account.getCurrentOrganization());
+    const status = client.getRateLimitStatus();
+    expect(status.requestsThisProcess).toBeGreaterThan(0);
+    expect(status.lastUpdated).toBeInstanceOf(Date);
+    if (status.limit != null) {
+      expect(typeof status.limit).toBe('number');
+    }
+    if (status.remaining != null) {
+      expect(typeof status.remaining).toBe('number');
+    }
   });
 
   it('lists contact types', async (ctx) => {

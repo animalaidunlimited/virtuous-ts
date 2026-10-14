@@ -33,6 +33,11 @@ import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { ContactListItem } from '../types/contact/contact';
 import type { SkipTakeParams } from '../types/shared/skip-take-params';
 import type { ContactGeoResult } from '../types/contact/contact-geo-location-query';
+import type { QueryRequest } from '../types/shared/query';
+import { queryAll, type QueryAllOptions, type QueryAllResult } from '../utils/query-all';
+import { listAll, type ListAllOptions, type ListAllResult } from '../utils/list-all';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 /**
  * Contact API client
@@ -48,7 +53,18 @@ import type { ContactGeoResult } from '../types/contact/contact-geo-location-que
  * @example
  * const contact = await virtuous.contact.getContactByReferenceId("12345");
  */
-const createContactClient = (client: AxiosInstance) => ({
+const createContactClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => {
+  const checkQuery = async (request: QueryRequest): Promise<void> => {
+    if (!options.validateQueries || !options.queryOptionsCache) {
+      return;
+    }
+    await validateQueryWithCache(client, options.queryOptionsCache, '/Contact/QueryOptions', request);
+  };
+
+  const contact = {
   // ── Single Contact Lookups ─────────────────────────────────────────────
   /**
    * Get a contact by ID
@@ -92,11 +108,25 @@ const createContactClient = (client: AxiosInstance) => ({
     client.get<ContactListResponse<ContactListItem>>(`/Contact/ByTag/${tagId}`, { params }).then((r) => r.data),
 
   /**
-   * Get contact types
+   * Get contact types.
+   *
+   * Virtuous returns at most 10 rows when `take` is omitted, and this endpoint
+   * does not accept `skip`/`take`. If the organization has more than 10 types,
+   * the API will not page them through this method.
+   *
    * @see https://docs.virtuoussoftware.com/#a55a9047-cda1-4a9d-8c79-0b62e2246597
-   * @returns {Promise<ContactType[]>} Resolved API payload.
+   * @returns {Promise<ContactType[]>} Resolved API payload. May be truncated at 10.
    */
   getContactTypes: () =>
+    client.get<ContactType[]>('/Contact/Types').then((r) => r.data),
+
+  /**
+   * Same as `getContactTypes`. The Types endpoint returns a plain array and
+   * ignores pagination, so this cannot page past the 10-row default.
+   *
+   * @returns {Promise<ContactType[]>} Contact types, possibly truncated at 10.
+   */
+  getContactTypesAll: () =>
     client.get<ContactType[]>('/Contact/Types').then((r) => r.data),
 
   /**
@@ -198,8 +228,24 @@ const createContactClient = (client: AxiosInstance) => ({
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactListResponse<ContactListItem>>} Resolved API payload.
    */
-  queryContactsWithAbbreviatedDetails: (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) =>
-    client.post<ContactListResponse<ContactListItem>>('/Contact/Query', request, { params }).then((r) => r.data),
+  queryContactsWithAbbreviatedDetails: async (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) => {
+    await checkQuery(request);
+    return client.post<ContactListResponse<ContactListItem>>('/Contact/Query', request, { params }).then((r) => r.data);
+  },
+
+  /**
+   * Pages abbreviated contact query results until the list ends or the cap is hit.
+   * Default page size is 1,000. Default cap is 10,000 rows.
+   *
+   * @param request - Contact query body.
+   * @param opts - Page size, cap, progress callback, abort signal.
+   * @returns Concatenated contact list items.
+   */
+  queryAllContacts: (
+    request: ContactQueryGeolocationRequest,
+    opts?: QueryAllOptions,
+  ): Promise<QueryAllResult<ContactListItem>> =>
+    queryAll((params) => contact.queryContactsWithAbbreviatedDetails(request, params), opts),
 
   /**
    * Query contacts (full)
@@ -208,8 +254,10 @@ const createContactClient = (client: AxiosInstance) => ({
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ContactListResponse<Contact>>} Resolved API payload.
    */
-  queryContactsWithFullDetails: (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) =>
-    client.post<ContactListResponse<Contact>>('/Contact/Query/FullContact', request, { params }).then((r) => r.data),
+  queryContactsWithFullDetails: async (request: ContactQueryGeolocationRequest, params?: SkipTakeParams) => {
+    await checkQuery(request);
+    return client.post<ContactListResponse<Contact>>('/Contact/Query/FullContact', request, { params }).then((r) => r.data);
+  },
 
   /**
    * Get contact query options
@@ -261,24 +309,52 @@ const createContactClient = (client: AxiosInstance) => ({
       .then((r) => r.data),
 
   /**
+   * Pages followed contacts. `GET /Contact/Following` accepts `skip`/`take`
+   * and otherwise defaults to a short page.
+   *
+   * @param opts - Page size (default 500) and cap (default 5,000).
+   * @returns Every followed contact the cap allows.
+   */
+  getFollowedContactsAll: (opts?: ListAllOptions): Promise<ListAllResult<ContactListItem>> =>
+    listAll(
+      (params) =>
+        client
+          .get<ContactListResponse<ContactListItem>>('/Contact/Following', { params })
+          .then((r) => r.data),
+      opts,
+    ),
+
+  /**
    * Returns configured name prefixes and titles.
+   *
+   * This endpoint returns a plain array and does not accept `skip`/`take`.
+   * Virtuous defaults many catalog lists to 10 rows when paging is omitted.
+   *
    * @see https://docs.virtuoussoftware.com/#fc692434-1f79-4d7d-96bd-71f741eab7e9
-   * @returns {Promise<string[]>} Prefixes and titles.
+   * @returns {Promise<string[]>} Prefixes and titles. May be truncated at 10.
    */
   getContactPrefixes: () => client.get<string[]>('/Contact/Prefixes').then((r) => r.data),
 
   /**
    * Returns enabled custom fields for contacts.
+   *
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10
+   * definitions when the catalog is longer.
+   *
    * @see https://docs.virtuoussoftware.com/#060c7f43-3ff8-40a3-8e29-431cecb27f3e
-   * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+   * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog. May be truncated at 10.
    */
   getContactCustomFields: () =>
     client.get<CustomFieldDefinition[]>('/Contact/CustomFields').then((r) => r.data),
 
   /**
    * Returns custom collection definitions for contacts.
+   *
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10
+   * definitions when the catalog is longer.
+   *
    * @see https://docs.virtuoussoftware.com/#a1699247-3c3d-4c8e-8348-b97f9134697b
-   * @returns {Promise<CustomCollectionDefinition[]>} Collection definitions.
+   * @returns {Promise<CustomCollectionDefinition[]>} Collection definitions. May be truncated at 10.
    */
   listContactCustomCollections: () =>
     client.get<CustomCollectionDefinition[]>('/Contact/CustomCollections').then((r) => r.data),
@@ -353,6 +429,9 @@ const createContactClient = (client: AxiosInstance) => ({
     client
       .post<QueuedImportResponse>('/Contact/Batch', request)
       .then((r) => (r.data ?? {}) as QueuedImportResponse),
-});
+  };
+
+  return contact;
+};
 
 export default createContactClient;

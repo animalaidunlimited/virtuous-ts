@@ -31,3 +31,4 @@ diff-nav-only.txt
 **/llms.txt
 *.sidebar.html
 **/api-reference-sidebar*.html
+*.tgz

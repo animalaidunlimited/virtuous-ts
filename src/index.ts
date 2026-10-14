@@ -1,9 +1,19 @@
 // src/index.ts
 
-export { VirtuousClient } from './virtuous-client';
+export { VirtuousClient, DEFAULT_BASE_URL } from './virtuous-client';
 export type { VirtuousConfig } from './virtuous-client';
 export { VirtuousApiError } from './errors/virtuous-api-error';
 export type { VirtuousApiErrorResponse } from './errors/virtuous-api-error';
+
+export { VirtuousRateLimitError } from './http/rate-limit';
+export type { RateLimitStatus } from './http/rate-limit';
+export type { RetryOptions } from './http/retry';
+export { queryAll } from './utils/query-all';
+export type { QueryAllOptions, QueryAllResult } from './utils/query-all';
+export { listAll } from './utils/list-all';
+export type { ListAllOptions, ListAllResult } from './utils/list-all';
+export { validateQuery, VirtuousQueryValidationError } from './utils/validate-query';
+export type { QueryValidationIssue } from './utils/validate-query';
 
 export type { ListResponse } from './types/shared/list-response';
 export type { QueryRequest, QueryGroup, QueryCondition, QueryOperator } from './types/shared/query';

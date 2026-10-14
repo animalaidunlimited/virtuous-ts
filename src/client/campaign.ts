@@ -6,12 +6,19 @@ import type { SkipTakeParams } from '../types/shared/skip-take-params';
 import type { QueryRequest } from '../types/shared/query';
 import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { ListResponse } from '../types/shared/list-response';
+import { queryAll, type QueryAllOptions, type QueryAllResult } from '../utils/query-all';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 /**
  * Virtuous CRM campaign API.
  * @see https://docs.virtuoussoftware.com/#b4d712c1-5d85-4c1c-8a24-f5dd09deb413
  */
-const createCampaignClient = (client: AxiosInstance) => ({
+const createCampaignClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => {
+  const campaign = {
   /**
    * Returns a campaign by id.
    * @see https://docs.virtuoussoftware.com/#b4d712c1-5d85-4c1c-8a24-f5dd09deb413
@@ -48,10 +55,26 @@ const createCampaignClient = (client: AxiosInstance) => ({
    * @param {SkipTakeParams} params - Query parameters.
    * @returns {Promise<ListResponse<Campaign>>}
    */
-  queryCampaigns: (request: QueryRequest, params?: SkipTakeParams): Promise<ListResponse<Campaign>> => {
+  queryCampaigns: async (request: QueryRequest, params?: SkipTakeParams): Promise<ListResponse<Campaign>> => {
+    if (options.validateQueries && options.queryOptionsCache) {
+      await validateQueryWithCache(client, options.queryOptionsCache, '/Campaign/QueryOptions', request);
+    }
     return client.post<ListResponse<Campaign>>('/Campaign/Query', request, { params }).then((r) => r.data);
   },
 
-});
+  /**
+   * Pages `queryCampaigns` until the list ends or the cap is hit.
+   * Default page size is 1,000. Default cap is 10,000 rows.
+   *
+   * @param request - Campaign query body.
+   * @param opts - Page size, cap, progress callback, abort signal.
+   * @returns Concatenated campaigns.
+   */
+  queryAllCampaigns: (request: QueryRequest, opts?: QueryAllOptions): Promise<QueryAllResult<Campaign>> =>
+    queryAll((params) => campaign.queryCampaigns(request, params), opts),
+  };
+
+  return campaign;
+};
 
 export default createCampaignClient;

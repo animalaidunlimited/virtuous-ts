@@ -13,12 +13,17 @@ import type { QueryRequest } from '../types/shared/query';
 import type { QueryOptionsResponse } from '../types/shared/query-options';
 import type { SkipTakeParams } from '../types/shared/skip-take-params';
 import type { CustomFieldDefinition } from '../types/shared/custom-field-definition';
+import { validateQueryWithCache } from '../http/query-validation';
+import type { QueryOptionsCache } from '../http/query-options-cache';
 
 /**
  * Virtuous CRM Contact Note API.
  * @see https://docs.virtuoussoftware.com/#e5a3357c-c7d7-44e9-920a-cf4c13b32867
  */
-const createContactNoteClient = (client: AxiosInstance) => ({
+const createContactNoteClient = (
+  client: AxiosInstance,
+  options: { validateQueries?: boolean; queryOptionsCache?: QueryOptionsCache } = {},
+) => ({
   /**
    * Creates a note on a contact. `isPrivate` maps to JSON `private`.
    * @see https://docs.virtuoussoftware.com/#e5a3357c-c7d7-44e9-920a-cf4c13b32867
@@ -130,22 +135,32 @@ const createContactNoteClient = (client: AxiosInstance) => ({
    * @param {SkipTakeParams} [params] - Pagination.
    * @returns {Promise<ListResponse<ContactNote>>} Matching notes.
    */
-  queryContactNotes: (request: QueryRequest, params?: SkipTakeParams) =>
-    client
+  queryContactNotes: async (request: QueryRequest, params?: SkipTakeParams) => {
+    if (options.validateQueries && options.queryOptionsCache) {
+      await validateQueryWithCache(client, options.queryOptionsCache, '/ContactNote/QueryOptions', request);
+    }
+    return client
       .post<ListResponse<ContactNote>>('/ContactNote/Query', request, { params })
-      .then((r) => r.data),
+      .then((r) => r.data);
+  },
 
   /**
    * Returns configured contact note types.
+   *
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10 types.
+   *
    * @see https://docs.virtuoussoftware.com/#3842f3ed-833b-4ad1-94ce-e20ab6867dd5
-   * @returns {Promise<unknown>} Note types.
+   * @returns {Promise<unknown>} Note types. May be truncated at 10.
    */
   listContactNoteTypes: () => client.get<unknown>('/ContactNote/Types').then((r) => r.data),
 
   /**
    * Returns enabled custom fields for contact notes.
+   *
+   * Plain array, no `skip`/`take`. Virtuous may return only the first 10 definitions.
+   *
    * @see https://docs.virtuoussoftware.com/#4142c2e4-58af-4e2a-b3ea-a85ccf9d3723
-   * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog.
+   * @returns {Promise<CustomFieldDefinition[]>} Custom field catalog. May be truncated at 10.
    */
   getContactNoteCustomFields: () =>
     client.get<CustomFieldDefinition[]>('/ContactNote/CustomFields').then((r) => r.data),
