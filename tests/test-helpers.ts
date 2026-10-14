@@ -23,7 +23,7 @@ export const createTestClient = (): VirtuousClient => {
  * Uses timestamp to ensure uniqueness.
  */
 export const generateTestEmail = (): string => {
-  return `spencer${Math.floor(new Date().getTime() / 1000)}@animalaidunlimited.org`;
+  return `spencer${Math.floor(new Date().getTime() / 1000)}@example.com`;
 };
 
 /**
